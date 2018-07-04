@@ -22,6 +22,7 @@ func (rcv *databaseResource) Register(container *restful.Container) {
 	dbTags := []string{"Databases"}
 	collectionsTags := []string{"Collections"}
 	documentsTags := []string{"Documents"}
+	indexesTags := []string{"Indexes"}
 
 	ws.Path("/api/v1/databases").
 		Consumes(restful.MIME_JSON).
@@ -143,6 +144,39 @@ func (rcv *databaseResource) Register(container *restful.Container) {
 		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
 		Returns(http.StatusConflict, http.StatusText(http.StatusConflict), representation.Error{}).
 		Metadata(restfulspec.KeyOpenAPITags, documentsTags))
+
+	ws.Route(ws.GET("/{databaseName}/collections/{collectionName}/indexes").
+		To(rcv.getIndexes).
+		Doc("Get collection indexes.").
+		Param(ws.PathParameter("databaseName", "Database name").DataType("string")).
+		Param(ws.PathParameter("collectionName", "Collection name").DataType("string")).
+		Writes(representation.Documents{}).
+		Returns(http.StatusOK, http.StatusText(http.StatusOK), representation.Documents{}).
+		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
+		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
+		Metadata(restfulspec.KeyOpenAPITags, indexesTags))
+
+	ws.Route(ws.POST("/{databaseName}/collections/{collectionName}/indexes").
+		To(rcv.postIndex).
+		Doc("Create index.").
+		Param(ws.PathParameter("databaseName", "Database name").DataType("string")).
+		Param(ws.PathParameter("collectionName", "Collection name").DataType("string")).
+		Reads(representation.PostIndex{}).
+		Returns(http.StatusCreated, http.StatusText(http.StatusCreated), nil).
+		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
+		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
+		Metadata(restfulspec.KeyOpenAPITags, indexesTags))
+
+	ws.Route(ws.DELETE("/{databaseName}/collections/{collectionName}/indexes/{indexName}").
+		To(rcv.deleteIndex).
+		Doc("Create index.").
+		Param(ws.PathParameter("databaseName", "Database name").DataType("string")).
+		Param(ws.PathParameter("collectionName", "Collection name").DataType("string")).
+		Param(ws.PathParameter("indexName", "Index name").DataType("string")).
+		Returns(http.StatusAccepted, http.StatusText(http.StatusAccepted), nil).
+		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
+		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
+		Metadata(restfulspec.KeyOpenAPITags, indexesTags))
 
 	container.Add(ws)
 }

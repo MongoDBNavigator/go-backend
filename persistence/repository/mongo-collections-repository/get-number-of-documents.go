@@ -8,7 +8,7 @@ func (rcv *collectionsRepository) GetNumberOfDocuments(databaseName string, coll
 	count, err := rcv.db.DB(databaseName).C(collectionName).Count()
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return int64(count), nil

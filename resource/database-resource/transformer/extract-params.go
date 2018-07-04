@@ -4,7 +4,7 @@ import (
 	"github.com/emicklei/go-restful"
 )
 
-func ExtractParametersFromRequest(request *restful.Request, db *string, coll *string, docId *string) error {
+func ExtractParametersFromRequest(request *restful.Request, db *string, coll *string, docId *string, index *string) error {
 	if db != nil {
 		dbName, err := RequestToDatabaseName(request)
 
@@ -33,6 +33,16 @@ func ExtractParametersFromRequest(request *restful.Request, db *string, coll *st
 		}
 
 		*docId = id
+	}
+
+	if index != nil {
+		indexName, err := RequestToIndex(request)
+
+		if err != nil {
+			return err
+		}
+
+		*index = indexName
 	}
 
 	return nil

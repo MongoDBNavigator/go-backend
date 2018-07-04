@@ -4,9 +4,9 @@ import "github.com/MongoDBNavigator/go-backend/persistence/model"
 
 type CollectionsRepositoryInterface interface {
 	DropCollection(databaseName string, collectionName string) error
-	CreateIndex(databaseName string, collectionName string) error
-	DropIndex(databaseName string, collectionName string, key ...string) error
-	GetIndexes(databaseName string, collectionName string) ([]string, error)
+	CreateIndex(databaseName string, collectionName string, index *model.Index) error
+	DropIndex(databaseName string, collectionName string, indexName string) error
+	GetIndexes(databaseName string, collectionName string) ([]*model.Index, error)
 	GetNumberOfDocuments(databaseName string, collectionName string) (int64, error)
 	GetStats(databaseName string, collectionName string) (*model.CollectionStats, error)
 	Create(*CollectionInfo) error

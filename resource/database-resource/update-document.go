@@ -11,7 +11,7 @@ import (
 func (rcv *databaseResource) updateDocument(request *restful.Request, response *restful.Response) {
 	var databaseName, collectionName, documentId string
 
-	if err := transformer.ExtractParametersFromRequest(request, &databaseName, &collectionName, &documentId); err != nil {
+	if err := transformer.ExtractParametersFromRequest(request, &databaseName, &collectionName, &documentId, nil); err != nil {
 		response.WriteHeaderAndEntity(http.StatusBadRequest, err)
 		return
 	}
