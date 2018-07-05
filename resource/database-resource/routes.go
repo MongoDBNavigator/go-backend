@@ -6,6 +6,7 @@ import (
 	"github.com/MongoDBNavigator/go-backend/persistence/repository"
 	"github.com/MongoDBNavigator/go-backend/resource"
 	"github.com/MongoDBNavigator/go-backend/resource/database-resource/representation"
+	"github.com/MongoDBNavigator/go-backend/resource/middleware"
 	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-openapi"
 )
@@ -14,10 +15,13 @@ type databaseResource struct {
 	databasesRepository   repository.DatabasesRepositoryInterface
 	documentsRepository   repository.DocumentsRepositoryInterface
 	collectionsRepository repository.CollectionsRepositoryInterface
+	jwtMiddleware         middleware.Middleware
 }
 
 func (rcv *databaseResource) Register(container *restful.Container) {
 	ws := new(restful.WebService)
+
+	ws.Filter(rcv.jwtMiddleware.Handle)
 
 	dbTags := []string{"Databases"}
 	collectionsTags := []string{"Collections"}
@@ -185,10 +189,12 @@ func NewDatabaseResource(
 	databasesRepository repository.DatabasesRepositoryInterface,
 	collectionsRepository repository.CollectionsRepositoryInterface,
 	documentsRepository repository.DocumentsRepositoryInterface,
+	jwtMiddleware middleware.Middleware,
 ) resource.ResourceInterface {
 	return &databaseResource{
 		databasesRepository:   databasesRepository,
 		collectionsRepository: collectionsRepository,
 		documentsRepository:   documentsRepository,
+		jwtMiddleware:         jwtMiddleware,
 	}
 }

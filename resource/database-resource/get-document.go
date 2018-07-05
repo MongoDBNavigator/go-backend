@@ -16,12 +16,12 @@ func (rcv *databaseResource) getDocument(request *restful.Request, response *res
 		return
 	}
 
-	record, err := rcv.documentsRepository.GetById(databaseName, collectionName, documentId)
+	document, err := rcv.documentsRepository.GetById(databaseName, collectionName, documentId)
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusNotFound, representation.Error{Message: err.Error()})
 		return
 	}
 
-	response.WriteEntity(record)
+	response.WriteEntity(document)
 }

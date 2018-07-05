@@ -1,6 +1,10 @@
-hash: a86f0f87353add9fc316f90142d34284a98515a0391f8d48cd86d8782c18b647
-updated: 2018-07-03T15:36:50.132014879+03:00
+hash: 5f34fb58aede720b6b2543e52f63575a61bcd5b31ae0ec39d173579f80e6d00a
+updated: 2018-07-04T15:22:40.405518286+03:00
 imports:
+- name: github.com/auth0/go-jwt-middleware
+  version: 5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd
+- name: github.com/dgrijalva/jwt-go
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/emicklei/go-restful
   version: 3eb9738c1697594ea6e71a7156a9bb32ed216cf0
   subpackages:
@@ -12,9 +16,9 @@ imports:
 - name: github.com/go-openapi/jsonreference
   version: 3fb327e6747da3043567ee86abd02bb6376b6be2
 - name: github.com/go-openapi/spec
-  version: bcff419492eeeb01f76e77d2ebc714dc97b607f5
+  version: 16284f9da51d5a5b5dc67c8109a99b014c4b7f0a
 - name: github.com/go-openapi/swag
-  version: 811b1089cde9dad18d4d0c2d09fbdbf28dbd27a5
+  version: 2b0bd4f193d011c203529df626a65d63cb8a79e8
 - name: github.com/json-iterator/go
   version: ab8a2e0c74be9d3be70b3184d9acc634935ded82
 - name: github.com/mailru/easyjson
