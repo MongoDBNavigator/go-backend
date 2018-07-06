@@ -32,7 +32,7 @@ const (
 )
 
 func main() {
-	env := helper.GetVar("ENV", defaultEnv)
+	//env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("PORT", defaultApiAddress)
 	username := helper.GetVar("USERNAME", defaultUsername)
 	password := helper.GetVar("PASSWORD", defaultPassword)
@@ -63,19 +63,19 @@ func main() {
 	system_resource.NewSystemResource(systemRepository, jwtMiddleware).Register(wsContainer)
 	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 
-	if env != defaultEnv {
-		swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
+	//if env != defaultEnv {
+	swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
 
-		cors := restful.CrossOriginResourceSharing{
-			AllowedHeaders: []string{"Content-Type", "Accept"},
-			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			CookiesAllowed: false,
-			Container:      wsContainer,
-		}
-
-		wsContainer.Filter(cors.Filter)
-		wsContainer.Filter(wsContainer.OPTIONSFilter)
+	cors := restful.CrossOriginResourceSharing{
+		AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		CookiesAllowed: false,
+		Container:      wsContainer,
 	}
+
+	wsContainer.Filter(cors.Filter)
+	wsContainer.Filter(wsContainer.OPTIONSFilter)
+	//}
 
 	server := http.Server{Addr: apiAddress, Handler: wsContainer}
 

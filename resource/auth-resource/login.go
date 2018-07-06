@@ -5,8 +5,6 @@ import (
 
 	"time"
 
-	"fmt"
-
 	"github.com/MongoDBNavigator/go-backend/resource/auth-resource/representation"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/emicklei/go-restful"
@@ -19,8 +17,6 @@ func (rcv *authResource) login(request *restful.Request, response *restful.Respo
 		response.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
 		return
 	}
-
-	fmt.Println(postRequest, rcv.username, rcv.password)
 
 	if postRequest.Username != rcv.username || postRequest.Password != rcv.password {
 		response.WriteHeaderAndEntity(http.StatusForbidden, representation.Error{Message: "Invalid credentials."})

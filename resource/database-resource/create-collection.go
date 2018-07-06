@@ -3,17 +3,17 @@ package database_resource
 import (
 	"net/http"
 
-	"github.com/emicklei/go-restful"
 	"github.com/MongoDBNavigator/go-backend/persistence/repository"
 	"github.com/MongoDBNavigator/go-backend/resource/database-resource/representation"
 	"github.com/MongoDBNavigator/go-backend/resource/database-resource/transformer"
+	"github.com/emicklei/go-restful"
 )
 
 func (rcv *databaseResource) createCollection(request *restful.Request, response *restful.Response) {
 	databaseName, err := transformer.RequestToDatabaseName(request)
 
 	if err != nil {
-		response.WriteHeaderAndEntity(http.StatusBadRequest, err)
+		response.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
 		return
 	}
 

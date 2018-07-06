@@ -12,7 +12,7 @@ func (rcv *databaseResource) updateDocument(request *restful.Request, response *
 	var databaseName, collectionName, documentId string
 
 	if err := transformer.ExtractParametersFromRequest(request, &databaseName, &collectionName, &documentId, nil); err != nil {
-		response.WriteHeaderAndEntity(http.StatusBadRequest, err)
+		response.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
 		return
 	}
 

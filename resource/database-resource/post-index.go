@@ -13,7 +13,7 @@ func (rcv *databaseResource) postIndex(request *restful.Request, response *restf
 	var databaseName, collectionName string
 
 	if err := transformer.ExtractParametersFromRequest(request, &databaseName, &collectionName, nil, nil); err != nil {
-		response.WriteHeaderAndEntity(http.StatusBadRequest, err)
+		response.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
 		return
 	}
 
@@ -33,7 +33,7 @@ func (rcv *databaseResource) postIndex(request *restful.Request, response *restf
 	)
 
 	if err := rcv.collectionsRepository.CreateIndex(databaseName, collectionName, index); err != nil {
-		response.WriteHeaderAndEntity(http.StatusInternalServerError, err)
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
 		return
 	}
 
