@@ -5,8 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/emicklei/go-restful"
+	"net/url"
+
+	"fmt"
+
 	"github.com/MongoDBNavigator/go-backend/persistence/repository"
+	"github.com/emicklei/go-restful"
 )
 
 func RequestToListConditions(request *restful.Request) (*repository.GetListConditions, error) {
@@ -54,19 +58,31 @@ func RequestToListConditions(request *restful.Request) (*repository.GetListCondi
 		return nil, errors.New("Skip parameter should be 0 or more.")
 	}
 
-	var sortField, sortDirection string
+	params, err := url.ParseQuery(request.Request.URL.RawQuery)
 
-	sortFieldParam := request.QueryParameter("sortField")
-	sortDirectionParam := request.QueryParameter("sortDirection")
-
-	if len(strings.TrimSpace(sortFieldParam)) != 0 && len(strings.TrimSpace(sortDirectionParam)) != 0 {
-		if sortDirectionParam != "asc" && sortDirectionParam != "desc" {
-			return nil, errors.New("Sort direction should be equal to 'asc' or 'desc'.")
-		}
-
-		sortField = sortFieldParam
-		sortDirection = sortDirectionParam
+	if err != nil {
+		return nil, err
 	}
 
-	return repository.NewGetListConditions(databaseName, collectionName, limit, skip, sortField, sortDirection), nil
+	//fmt.Println(params["filter[]"])
+
+	var sorts []string
+
+	if _, ok := params["sort[]"]; ok {
+		sorts = make([]string, len(params["sort[]"]))
+
+		for i, sort := range params["sort[]"] {
+			if len(strings.TrimSpace(sort)) != 0 {
+				return nil, errors.New("sort[] value should not be blank.")
+			}
+
+			if strings.HasPrefix(sort, "-") == false {
+				sort = fmt.Sprintf("+%s", sort)
+			}
+
+			sorts[i] = sort
+		}
+	}
+
+	return repository.NewGetListConditions(databaseName, collectionName, limit, skip, sorts), nil
 }

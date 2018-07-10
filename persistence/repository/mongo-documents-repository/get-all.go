@@ -14,8 +14,10 @@ func (rcv *documentsRepository) GetAll(conditions *repository.GetListConditions)
 		Limit(conditions.GetLimit()).
 		Skip(conditions.GetSkip())
 
-	if sort := conditions.GetSort(); sort != nil {
-		query.Sort(fmt.Sprintf("%s%s", sort.GetSortDirection(), sort.GetSortField()))
+	fmt.Println(conditions.GetSort())
+
+	if len(conditions.GetSort()) != 0 {
+		query.Sort(conditions.GetSort()...)
 	}
 
 	if err := query.All(&result); err != nil {

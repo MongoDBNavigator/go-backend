@@ -13,7 +13,7 @@ type GetListConditions struct {
 	collectionName string
 	limit          int
 	skip           int
-	sort           *Sort
+	sort           []string
 }
 
 func NewGetListConditions(
@@ -21,17 +21,8 @@ func NewGetListConditions(
 	collectionName string,
 	limit int,
 	skip int,
-	sortField string,
-	sortDirection string,
+	sort []string,
 ) *GetListConditions {
-	var sort *Sort
-
-	if sortField != "" && sortDirection != "" {
-		sort = new(Sort)
-		sort.field = sortField
-		sort.direction = sortDirection
-	}
-
 	return &GetListConditions{
 		databaseName:   databaseName,
 		collectionName: collectionName,
@@ -57,23 +48,6 @@ func (rcv *GetListConditions) GetSkip() int {
 	return rcv.skip
 }
 
-func (rcv *GetListConditions) GetSort() *Sort {
+func (rcv *GetListConditions) GetSort() []string {
 	return rcv.sort
-}
-
-type Sort struct {
-	field     string
-	direction string
-}
-
-func (rcv *Sort) GetSortField() string {
-	return rcv.field
-}
-
-func (rcv *Sort) GetSortDirection() string {
-	if rcv.direction == "asc" {
-		return "+"
-	}
-
-	return "-"
 }
