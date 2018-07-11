@@ -5,9 +5,12 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-func (rcv *documentsRepository) GetAll(conditions *repository.GetListConditions) ([]interface{}, error) {
+//
+// Returns the count of documents that would match a find() query for the collection or view.
+// https://docs.mongodb.com/manual/reference/method/db.collection.count/#db.collection.count
+//
+func (rcv *documentsRepository) GetNumberOfDocuments(conditions *repository.GetListConditions) (int, error) {
 	collection := rcv.db.DB(conditions.DatabaseName()).C(conditions.CollectionName())
-	var result []interface{}
 	var query *mgo.Query
 
 	if len(conditions.Filter()) != 0 {
@@ -16,15 +19,5 @@ func (rcv *documentsRepository) GetAll(conditions *repository.GetListConditions)
 		query = collection.Find(nil)
 	}
 
-	query.Limit(conditions.Limit()).Skip(conditions.Skip())
-
-	if len(conditions.Sort()) != 0 {
-		query.Sort(conditions.Sort()...)
-	}
-
-	if err := query.All(&result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return query.Count()
 }

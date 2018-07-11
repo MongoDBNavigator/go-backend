@@ -23,7 +23,7 @@ func (rcv *databaseResource) getDocuments(request *restful.Request, response *re
 		return
 	}
 
-	total, err := rcv.collectionsRepository.GetNumberOfDocuments(listConditions.GetDatabaseName(), listConditions.GetCollectionName())
+	total, err := rcv.documentsRepository.GetNumberOfDocuments(listConditions)
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
