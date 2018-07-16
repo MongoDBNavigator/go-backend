@@ -1,6 +1,6 @@
 package representation
 
-// Structure for index json representation
+// Index structure to represent index json
 type Index struct {
 	Name       string   `json:"name"`
 	Unique     bool     `json:"unique"`

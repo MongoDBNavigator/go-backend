@@ -1,6 +1,6 @@
 package representation
 
-// Structure for collection json representation
+// Collection structure to represent collection json
 type Collection struct {
 	Name            string `json:"name"`
 	DocumentsNumber int    `json:"documentsNumber"`

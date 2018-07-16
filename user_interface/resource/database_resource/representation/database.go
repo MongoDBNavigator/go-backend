@@ -1,6 +1,6 @@
 package representation
 
-// Structure for database json representation
+// Database structure to represent database json
 type Database struct {
 	Name          string `json:"name"`
 	Collections   int    `json:"collections"`
