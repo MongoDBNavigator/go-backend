@@ -8,16 +8,21 @@ import (
 
 	"strconv"
 
-	"github.com/MongoDBNavigator/go-backend/helper"
-	"github.com/MongoDBNavigator/go-backend/persistence/repository/mongo-collections-repository"
-	"github.com/MongoDBNavigator/go-backend/persistence/repository/mongo-databases-repository"
-	"github.com/MongoDBNavigator/go-backend/persistence/repository/mongo-documents-repository"
-	"github.com/MongoDBNavigator/go-backend/persistence/repository/mongo-system-repository"
-	"github.com/MongoDBNavigator/go-backend/resource/auth-resource"
-	"github.com/MongoDBNavigator/go-backend/resource/database-resource"
-	"github.com/MongoDBNavigator/go-backend/resource/middleware"
-	"github.com/MongoDBNavigator/go-backend/resource/swagger-resource"
-	"github.com/MongoDBNavigator/go-backend/resource/system-resource"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/collection_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/collection_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/database_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/database_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/system_info_reader"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database_resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/swagger_resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource"
 	"github.com/emicklei/go-restful"
 	"gopkg.in/mgo.v2"
 )
@@ -50,17 +55,36 @@ func main() {
 
 	defer mongoSession.Close()
 
-	databasesRepository := mongo_databases_repository.New(mongoSession)
-	collectionsRepository := mongo_collections_repository.New(mongoSession)
-	systemRepository := mongo_system_repository.New(mongoSession, defaultMongoUrl)
-	recordsRepository := mongo_documents_repository.New(mongoSession)
+	databaseReader := database_reader.New(mongoSession)
+	databaseWriter := database_writer.New(mongoSession)
+
+	collectionsReader := collection_reader.New(mongoSession)
+	collectionsWriter := collection_writer.New(mongoSession)
+
+	documentReader := document_reader.New(mongoSession)
+	documentWriter := document_writer.New(mongoSession)
+
+	indexReader := index_reader.New(mongoSession)
+	indexWriter := index_writer.New(mongoSession)
+
+	systemReader := system_info_reader.New(mongoSession, defaultMongoUrl)
 
 	var wsContainer = restful.NewContainer()
 
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
 
-	database_resource.NewDatabaseResource(databasesRepository, collectionsRepository, recordsRepository, jwtMiddleware).Register(wsContainer)
-	system_resource.NewSystemResource(systemRepository, jwtMiddleware).Register(wsContainer)
+	database_resource.NewDatabaseResource(
+		databaseReader,
+		databaseWriter,
+		collectionsReader,
+		collectionsWriter,
+		documentReader,
+		documentWriter,
+		indexReader,
+		indexWriter,
+		jwtMiddleware,
+	).Register(wsContainer)
+	system_resource.NewSystemResource(systemReader, jwtMiddleware).Register(wsContainer)
 	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 
 	//if env != defaultEnv {

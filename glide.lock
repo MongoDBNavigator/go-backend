@@ -1,5 +1,5 @@
-hash: 5f34fb58aede720b6b2543e52f63575a61bcd5b31ae0ec39d173579f80e6d00a
-updated: 2018-07-04T15:22:40.405518286+03:00
+hash: 88f19d97f43cc0cde841126d38e16429160d6edbc0e507df6912244195425f55
+updated: 2018-07-12T13:07:58.22340649+03:00
 imports:
 - name: github.com/auth0/go-jwt-middleware
   version: 5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd
@@ -16,9 +16,13 @@ imports:
 - name: github.com/go-openapi/jsonreference
   version: 3fb327e6747da3043567ee86abd02bb6376b6be2
 - name: github.com/go-openapi/spec
-  version: 16284f9da51d5a5b5dc67c8109a99b014c4b7f0a
+  version: bce47c9386f9ecd6b86f450478a80103c3fe1402
 - name: github.com/go-openapi/swag
   version: 2b0bd4f193d011c203529df626a65d63cb8a79e8
+- name: github.com/golang/mock
+  version: c34cdb4725f4c3844d095133c6e40e448b86589b
+  subpackages:
+  - mockgen
 - name: github.com/json-iterator/go
   version: ab8a2e0c74be9d3be70b3184d9acc634935ded82
 - name: github.com/mailru/easyjson
@@ -35,12 +39,16 @@ imports:
   version: 975f53781597ed779763b7b65566e74c4004d8de
 - name: github.com/PuerkitoBio/urlesc
   version: de5bf2ad457846296e2031421a34e2568e304e35
+- name: github.com/stretchr/testify
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  subpackages:
+  - assert
 - name: golang.org/x/net
-  version: ed29d75add3d7c4bf7ca65aac0c6df3d1420216f
+  version: cffdcf672aee934982473246bc7e9a8ba446aa9b
   subpackages:
   - idna
 - name: golang.org/x/text
-  version: c0fe8dde8a10c9b32154bd9bdf080b8b3d635127
+  version: 0605a8320aceb4207a5fb3521281e17ec2075476
   subpackages:
   - secure/bidirule
   - transform
@@ -48,7 +56,7 @@ imports:
   - unicode/norm
   - width
 - name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
   subpackages:
   - bson
   - internal/json
@@ -56,4 +64,12 @@ imports:
   - internal/scram
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
