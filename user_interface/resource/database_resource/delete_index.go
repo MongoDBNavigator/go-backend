@@ -21,7 +21,7 @@ func (rcv *databaseResource) deleteIndex(req *restful.Request, res *restful.Resp
 	}
 
 	if err := rcv.indexWriter.Delete(dbName, collName, indexName); err != nil {
-		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
 		return
 	}
 

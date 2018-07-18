@@ -30,6 +30,7 @@ func (rcv *systemResource) Register(container *restful.Container) {
 	ws.Route(ws.GET("/info").
 		To(rcv.getInfo).
 		Doc("Get system info (server version, etc.).").
+		Param(ws.HeaderParameter("Authorization", "Bearer authentication").DataType("string")).
 		Writes(representation.Info{}).
 		Returns(http.StatusOK, http.StatusText(http.StatusOK), representation.Info{}).
 		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).

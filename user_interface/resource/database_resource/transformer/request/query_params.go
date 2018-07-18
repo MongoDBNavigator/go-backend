@@ -15,7 +15,7 @@ import (
 
 func ExtractSkip(request *restful.Request) (int, error) {
 	if len(strings.TrimSpace(request.QueryParameter("skip"))) == 0 {
-		return 0, errors.New("skip parameter should not be blank")
+		return 0, nil
 	}
 
 	skip, err := strconv.Atoi(request.QueryParameter("skip"))
@@ -33,7 +33,7 @@ func ExtractSkip(request *restful.Request) (int, error) {
 
 func ExtractLimit(request *restful.Request) (int, error) {
 	if len(strings.TrimSpace(request.QueryParameter("limit"))) == 0 {
-		return 0, errors.New("limit parameter should not be blank")
+		return 10, nil
 	}
 
 	limit, err := strconv.Atoi(request.QueryParameter("limit"))

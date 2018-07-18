@@ -7,7 +7,7 @@ import (
 
 // Fetch documents with pagination and filters
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
-func (rcv *documentReader) ReadeAll(conditions *value.ReadAllDocConditions) ([]interface{}, error) {
+func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]interface{}, error) {
 	collection := rcv.db.DB(string(conditions.DbName())).C(string(conditions.CollName()))
 	var result []interface{}
 	var query *mgo.Query

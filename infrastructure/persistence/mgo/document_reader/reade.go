@@ -7,7 +7,7 @@ import (
 
 // Fetch document by ID
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
-func (rcv *documentReader) Reade(dbName value.DBName, collName value.CollName, docId value.DocId) (interface{}, error) {
+func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, docId value.DocId) (interface{}, error) {
 	var result interface{}
 	var id interface{}
 

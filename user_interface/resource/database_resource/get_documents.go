@@ -18,14 +18,14 @@ func (rcv *databaseResource) getDocuments(req *restful.Request, res *restful.Res
 		return
 	}
 
-	records, err := rcv.documentReader.ReadeAll(listConditions)
+	records, err := rcv.documentReader.ReadAll(listConditions)
 
 	if err != nil {
 		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
 		return
 	}
 
-	total, err := rcv.documentReader.ReadeCount(listConditions)
+	total, err := rcv.documentReader.ReadCount(listConditions)
 
 	if err != nil {
 		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})

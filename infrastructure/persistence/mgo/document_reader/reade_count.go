@@ -7,7 +7,7 @@ import (
 
 // Get documents count by filters
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
-func (rcv *documentReader) ReadeCount(conditions *value.ReadAllDocConditions) (int, error) {
+func (rcv *documentReader) ReadCount(conditions *value.ReadAllDocConditions) (int, error) {
 	collection := rcv.db.DB(string(conditions.DbName())).C(string(conditions.CollName()))
 	var query *mgo.Query
 

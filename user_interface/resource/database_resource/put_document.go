@@ -20,7 +20,7 @@ func (rcv *databaseResource) putDocument(req *restful.Request, res *restful.Resp
 		return
 	}
 
-	if _, err := rcv.documentReader.Reade(dbName, collName, docId); err != nil {
+	if _, err := rcv.documentReader.Read(dbName, collName, docId); err != nil {
 		res.WriteHeaderAndEntity(http.StatusNotFound, representation.Error{Message: err.Error()})
 		return
 	}

@@ -36,7 +36,7 @@ func (rcv *databaseResource) postIndex(req *restful.Request, res *restful.Respon
 	)
 
 	if err := rcv.indexWriter.Create(dbName, collName, index); err != nil {
-		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
 		return
 	}
 
