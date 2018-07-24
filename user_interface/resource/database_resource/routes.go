@@ -20,7 +20,10 @@ type databaseResource struct {
 	documentWriter    repository.DocumentWriter
 	indexReader       repository.IndexReader
 	indexWriter       repository.IndexWriter
+	validationReader  repository.ValidationReader
+	validationWriter  repository.ValidationWriter
 	jwtMiddleware     middleware.Middleware
+	recoverMiddleware middleware.Middleware
 }
 
 // Method to register resource
@@ -28,11 +31,13 @@ func (rcv *databaseResource) Register(container *restful.Container) {
 	ws := new(restful.WebService)
 
 	ws.Filter(rcv.jwtMiddleware.Handle)
+	//ws.Filter(rcv.recoverMiddleware.Handle)
 
 	dbTags := []string{"Databases"}
 	collectionsTags := []string{"Collections"}
 	documentsTags := []string{"Documents"}
 	indexesTags := []string{"Indexes"}
+	validationTags := []string{"validation"}
 
 	ws.Path("/api/v1/databases").
 		Consumes(restful.MIME_JSON).
@@ -206,6 +211,30 @@ func (rcv *databaseResource) Register(container *restful.Container) {
 		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
 		Metadata(restfulspec.KeyOpenAPITags, indexesTags))
 
+	ws.Route(ws.GET("/{databaseName}/collections/{collectionName}/validation").
+		To(rcv.getValidation).
+		Doc("Get collection validation.").
+		Param(ws.HeaderParameter("Authorization", "Bearer authentication").DataType("string")).
+		Param(ws.PathParameter("databaseName", "Database name").DataType("string")).
+		Param(ws.PathParameter("collectionName", "Collection name").DataType("string")).
+		Writes(representation.Validation{}).
+		Returns(http.StatusOK, http.StatusText(http.StatusOK), representation.Validation{}).
+		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
+		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
+		Metadata(restfulspec.KeyOpenAPITags, validationTags))
+
+	ws.Route(ws.POST("/{databaseName}/collections/{collectionName}/validation").
+		To(rcv.postValidation).
+		Doc("Post collection validation.").
+		Param(ws.HeaderParameter("Authorization", "Bearer authentication").DataType("string")).
+		Param(ws.PathParameter("databaseName", "Database name").DataType("string")).
+		Param(ws.PathParameter("collectionName", "Collection name").DataType("string")).
+		Reads(representation.PostIndex{}).
+		Returns(http.StatusOK, http.StatusText(http.StatusCreated), nil).
+		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
+		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
+		Metadata(restfulspec.KeyOpenAPITags, validationTags))
+
 	container.Add(ws)
 }
 
@@ -219,7 +248,10 @@ func NewDatabaseResource(
 	documentWriter repository.DocumentWriter,
 	indexReader repository.IndexReader,
 	indexWriter repository.IndexWriter,
+	validationReader repository.ValidationReader,
+	validationWriter repository.ValidationWriter,
 	jwtMiddleware middleware.Middleware,
+	recoverMiddleware middleware.Middleware,
 ) resource.Resource {
 	return &databaseResource{
 		databaseReader:    databaseReader,
@@ -230,6 +262,9 @@ func NewDatabaseResource(
 		documentWriter:    documentWriter,
 		indexReader:       indexReader,
 		indexWriter:       indexWriter,
+		validationReader:  validationReader,
+		validationWriter:  validationWriter,
 		jwtMiddleware:     jwtMiddleware,
+		recoverMiddleware: recoverMiddleware,
 	}
 }

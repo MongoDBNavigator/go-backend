@@ -19,6 +19,8 @@ var (
 	documentWriter    *mock.MockDocumentWriter
 	indexReader       *mock.MockIndexReader
 	indexWriter       *mock.MockIndexWriter
+	validationReader  *mock.MockValidationReader
+	validationWriter  *mock.MockValidationWriter
 )
 
 func initResource(t *testing.T) *restful.Container {
@@ -32,6 +34,8 @@ func initResource(t *testing.T) *restful.Container {
 	documentWriter = mock.NewMockDocumentWriter(ctrl)
 	indexReader = mock.NewMockIndexReader(ctrl)
 	indexWriter = mock.NewMockIndexWriter(ctrl)
+	validationReader = mock.NewMockValidationReader(ctrl)
+	validationWriter = mock.NewMockValidationWriter(ctrl)
 
 	wsContainer := restful.NewContainer()
 
@@ -44,7 +48,10 @@ func initResource(t *testing.T) *restful.Container {
 		documentWriter,
 		indexReader,
 		indexWriter,
+		validationReader,
+		validationWriter,
 		middleware.NewJwtMiddleware(helper.PASSWORD),
+		middleware.NewRecoverMiddleware(),
 	).Register(wsContainer)
 
 	return wsContainer

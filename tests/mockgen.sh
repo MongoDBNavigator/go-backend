@@ -12,3 +12,6 @@ mockgen -destination=${GOPATH}/src/github.com/MongoDBNavigator/go-backend/tests/
 
 mockgen -destination=${GOPATH}/src/github.com/MongoDBNavigator/go-backend/tests/mock/index_reader.go -package=mock github.com/MongoDBNavigator/go-backend/domain/database/repository IndexReader
 mockgen -destination=${GOPATH}/src/github.com/MongoDBNavigator/go-backend/tests/mock/index_writer.go -package=mock github.com/MongoDBNavigator/go-backend/domain/database/repository IndexWriter
+
+mockgen -destination=${GOPATH}/src/github.com/MongoDBNavigator/go-backend/tests/mock/validation_reader.go -package=mock github.com/MongoDBNavigator/go-backend/domain/database/repository ValidationReader
+mockgen -destination=${GOPATH}/src/github.com/MongoDBNavigator/go-backend/tests/mock/validation_writer.go -package=mock github.com/MongoDBNavigator/go-backend/domain/database/repository ValidationWriter

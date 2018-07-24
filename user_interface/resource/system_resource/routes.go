@@ -13,8 +13,9 @@ import (
 )
 
 type systemResource struct {
-	systemInfoReader repository.SystemInfoReader
-	jwtMiddleware    middleware.Middleware
+	systemInfoReader  repository.SystemInfoReader
+	jwtMiddleware     middleware.Middleware
+	recoverMiddleware middleware.Middleware
 }
 
 // Method to register resource
@@ -22,6 +23,7 @@ func (rcv *systemResource) Register(container *restful.Container) {
 	ws := new(restful.WebService)
 
 	ws.Filter(rcv.jwtMiddleware.Handle)
+	ws.Filter(rcv.recoverMiddleware.Handle)
 
 	ws.Path("/api/v1/system").
 		Consumes(restful.MIME_JSON).
@@ -40,9 +42,14 @@ func (rcv *systemResource) Register(container *restful.Container) {
 }
 
 // Constructor for systemResource
-func NewSystemResource(systemInfoReader repository.SystemInfoReader, jwtMiddleware middleware.Middleware) resource.Resource {
+func NewSystemResource(
+	systemInfoReader repository.SystemInfoReader,
+	jwtMiddleware middleware.Middleware,
+	recoverMiddleware middleware.Middleware,
+) resource.Resource {
 	return &systemResource{
-		systemInfoReader: systemInfoReader,
-		jwtMiddleware:    jwtMiddleware,
+		systemInfoReader:  systemInfoReader,
+		jwtMiddleware:     jwtMiddleware,
+		recoverMiddleware: recoverMiddleware,
 	}
 }

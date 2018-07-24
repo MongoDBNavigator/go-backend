@@ -18,6 +18,8 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/system_info_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database_resource"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
@@ -53,6 +55,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from ", r)
+		}
+	}()
 	defer mongoSession.Close()
 
 	databaseReader := database_reader.New(mongoSession)
@@ -67,11 +74,15 @@ func main() {
 	indexReader := index_reader.New(mongoSession)
 	indexWriter := index_writer.New(mongoSession)
 
+	validationReader := validation_reader.New(mongoSession)
+	validationWriter := validator_writer.New(mongoSession)
+
 	systemReader := system_info_reader.New(mongoSession, defaultMongoUrl)
 
 	var wsContainer = restful.NewContainer()
 
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
+	recoverMiddleware := middleware.NewRecoverMiddleware()
 
 	database_resource.NewDatabaseResource(
 		databaseReader,
@@ -82,9 +93,12 @@ func main() {
 		documentWriter,
 		indexReader,
 		indexWriter,
+		validationReader,
+		validationWriter,
 		jwtMiddleware,
+		recoverMiddleware,
 	).Register(wsContainer)
-	system_resource.NewSystemResource(systemReader, jwtMiddleware).Register(wsContainer)
+	system_resource.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
 	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 
 	//if env != defaultEnv {
