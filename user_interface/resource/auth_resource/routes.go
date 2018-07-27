@@ -6,7 +6,7 @@ import (
 	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-openapi"
 
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource/representation"
 )
 
@@ -38,7 +38,7 @@ func (rcv *authResource) Register(container *restful.Container) {
 }
 
 // Constructor for swaggerResource
-func NewAuthResource(username string, password string, exp int) resource.Resource {
+func NewAuthResource(username string, password string, exp int) user_interface.WebService {
 	return &authResource{
 		username: username,
 		password: password,

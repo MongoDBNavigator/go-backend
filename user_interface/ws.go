@@ -1,7 +1,7 @@
-package resource
+package user_interface
 
 import "github.com/emicklei/go-restful"
 
-type Resource interface {
+type WebService interface {
 	Register(container *restful.Container)
 }

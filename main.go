@@ -30,37 +30,38 @@ import (
 )
 
 const (
-	defaultMongoUrl   = "127.0.0.1:27017"
-	defaultApiAddress = ":8080"
-	defaultUsername   = "admin"
-	defaultPassword   = "admin"
-	defaultJwtExp     = "24" // hours
-	defaultEnv        = "prod"
+	defaultEnv             = "prod"
+	defaultJwtExp          = "24" // hours
+	defaultMongoUrl        = "127.0.0.1:27017"
+	defaultUsername        = "admin"
+	defaultPassword        = "admin"
+	defaultApiAddress      = ":8080"
+	defaultStaticFilesPath = "/var/www"
 )
 
 func main() {
 	//env := helper.GetVar("ENV", "dev")
-	apiAddress := helper.GetVar("PORT", defaultApiAddress)
-	username := helper.GetVar("USERNAME", defaultUsername)
-	password := helper.GetVar("PASSWORD", defaultPassword)
-	jwtExp, err := strconv.Atoi(helper.GetVar("JWT_EXP", defaultJwtExp))
+	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
+	username := helper.GetVar("MN_USERNAME", defaultUsername)
+	password := helper.GetVar("MN_PASSWORD", defaultPassword)
+	jwtExp, err := strconv.Atoi(helper.GetVar("MN_JWT_EXP", defaultJwtExp))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	mongoSession, err := mgo.Dial(helper.GetVar("MONGO_URL", defaultMongoUrl))
+	mongoSession, err := mgo.Dial(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	defer mongoSession.Close()
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("recovered from ", r)
 		}
 	}()
-	defer mongoSession.Close()
 
 	databaseReader := database_reader.New(mongoSession)
 	databaseWriter := database_writer.New(mongoSession)
@@ -84,6 +85,8 @@ func main() {
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
 	recoverMiddleware := middleware.NewRecoverMiddleware()
 
+	system_resource.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
+	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 	database_resource.NewDatabaseResource(
 		databaseReader,
 		databaseWriter,
@@ -98,8 +101,6 @@ func main() {
 		jwtMiddleware,
 		recoverMiddleware,
 	).Register(wsContainer)
-	system_resource.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
-	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 
 	//if env != defaultEnv {
 	swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
@@ -114,6 +115,9 @@ func main() {
 	wsContainer.Filter(cors.Filter)
 	wsContainer.Filter(wsContainer.OPTIONSFilter)
 	//}
+
+	// Route for js app
+	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))
 
 	server := http.Server{Addr: apiAddress, Handler: wsContainer}
 

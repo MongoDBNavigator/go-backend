@@ -1,11 +1,10 @@
 package swagger_resource
 
 import (
+	"github.com/MongoDBNavigator/go-backend/user_interface"
 	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-openapi"
 	"github.com/go-openapi/spec"
-
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource"
 )
 
 // This resource generate json api docs for Swagger UI
@@ -34,7 +33,7 @@ func (rcv *swaggerResource) Register(container *restful.Container) {
 }
 
 // Constructor for swaggerResource
-func NewSwaggerResource(sebServicesURL string) resource.Resource {
+func NewSwaggerResource(sebServicesURL string) user_interface.WebService {
 	return &swaggerResource{
 		sebServicesURL: sebServicesURL,
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/emicklei/go-restful-openapi"
 
 	"github.com/MongoDBNavigator/go-backend/domain/system/repository"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource/representation"
 )
@@ -46,7 +46,7 @@ func NewSystemResource(
 	systemInfoReader repository.SystemInfoReader,
 	jwtMiddleware middleware.Middleware,
 	recoverMiddleware middleware.Middleware,
-) resource.Resource {
+) user_interface.WebService {
 	return &systemResource{
 		systemInfoReader:  systemInfoReader,
 		jwtMiddleware:     jwtMiddleware,

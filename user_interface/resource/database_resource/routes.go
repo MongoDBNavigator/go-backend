@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/repository"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database_resource/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
 	"github.com/emicklei/go-restful"
@@ -252,7 +252,7 @@ func NewDatabaseResource(
 	validationWriter repository.ValidationWriter,
 	jwtMiddleware middleware.Middleware,
 	recoverMiddleware middleware.Middleware,
-) resource.Resource {
+) user_interface.WebService {
 	return &databaseResource{
 		databaseReader:    databaseReader,
 		databaseWriter:    databaseWriter,
