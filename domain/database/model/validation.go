@@ -26,16 +26,34 @@ func (v *Validation) ValidationAction() value.ValidationAction {
 
 // Validation Property (field name and constraints)
 type ValidationProperty struct {
-	name        string
-	required    bool
-	bsonType    string
-	enum        []interface{}
-	description string
-	minimum     int
-	maximum     int
-	pattern     string
-	maxLength   int
-	minLength   int
+	name             string
+	required         bool
+	bsonType         string
+	enum             []interface{}
+	description      string
+	minimum          int
+	maximum          int
+	exclusiveMaximum bool
+	exclusiveMinimum bool
+	uniqueItems      bool
+	pattern          string
+	maxLength        int
+	minLength        int
+}
+
+// Getter for exclusiveMinimum
+func (v *ValidationProperty) ExclusiveMinimum() bool {
+	return v.exclusiveMinimum
+}
+
+// Getter for exclusiveMaximum
+func (v *ValidationProperty) ExclusiveMaximum() bool {
+	return v.exclusiveMaximum
+}
+
+// Getter for uniqueItems
+func (v *ValidationProperty) UniqueItems() bool {
+	return v.uniqueItems
 }
 
 // Getter for minLength

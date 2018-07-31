@@ -11,6 +11,7 @@ func CollectionToView(collection *model.Collection) *representation.Collection {
 		DocumentsNumber: collection.DocNumber(),
 		IndexesNumber:   collection.IndexesNumber(),
 		AvgObjSize:      collection.AvgObjSize(),
+		Size:            collection.Size(),
 	}
 }
 

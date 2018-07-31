@@ -32,10 +32,12 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 		countString := fmt.Sprintf("%v", stats["count"])
 		avgObjSizeString := fmt.Sprintf("%v", stats["avgObjSize"])
 		indexesNumberString := fmt.Sprintf("%v", stats["nindexes"])
+		sizeString := fmt.Sprintf("%v", stats["size"])
 
 		var count int
 		var avgObjSize int
 		var indexesNumber int
+		var size int
 
 		if i, err := strconv.Atoi(countString); err == nil {
 			count = i
@@ -49,7 +51,11 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 			indexesNumber = i
 		}
 
-		result[i] = model.NewCollection(name, count, avgObjSize, indexesNumber)
+		if i, err := strconv.Atoi(sizeString); err == nil {
+			size = i
+		}
+
+		result[i] = model.NewCollection(name, count, indexesNumber, avgObjSize, size)
 	}
 
 	return result, nil

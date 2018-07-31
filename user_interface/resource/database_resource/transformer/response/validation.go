@@ -10,16 +10,19 @@ func ValidationToView(model *model.Validation) *representation.Validation {
 
 	for i, prop := range model.Properties() {
 		properties[i] = &representation.ValidationProperty{
-			Name:        prop.Name(),
-			Enum:        prop.Enum(),
-			Pattern:     prop.Pattern(),
-			Minimum:     prop.Minimum(),
-			Maximum:     prop.Maximum(),
-			MinLength:   prop.MinLength(),
-			Type:        prop.BsonType(),
-			Required:    prop.Required(),
-			MaxLength:   prop.MaxLength(),
-			Description: prop.Description(),
+			Name:             prop.Name(),
+			Enum:             prop.Enum(),
+			Pattern:          prop.Pattern(),
+			Minimum:          prop.Minimum(),
+			Maximum:          prop.Maximum(),
+			MinLength:        prop.MinLength(),
+			Type:             prop.BsonType(),
+			Required:         prop.Required(),
+			MaxLength:        prop.MaxLength(),
+			Description:      prop.Description(),
+			UniqueItems:      prop.UniqueItems(),
+			ExclusiveMaximum: prop.ExclusiveMaximum(),
+			ExclusiveMinimum: prop.ExclusiveMinimum(),
 		}
 	}
 
