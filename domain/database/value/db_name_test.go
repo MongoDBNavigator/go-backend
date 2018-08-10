@@ -3,6 +3,8 @@ package value
 import (
 	"testing"
 
+	"strings"
+
 	"github.com/MongoDBNavigator/go-backend/domain/database/err"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,4 +49,13 @@ func TestDBNameInvalid3(t *testing.T) {
 
 	assert.Error(t, valid)
 	assert.Equal(t, err.NotValidDBName, valid)
+}
+
+func TestDBNameInvalidMaxLength(t *testing.T) {
+	dbName := DBName(strings.Repeat("a", 65))
+
+	valid := dbName.Valid()
+
+	assert.Error(t, valid)
+	assert.Equal(t, err.InvalidDBNameMaxLength, valid)
 }

@@ -223,7 +223,7 @@ func (rcv *databaseResource) Register(container *restful.Container) {
 		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
 		Metadata(restfulspec.KeyOpenAPITags, validationTags))
 
-	ws.Route(ws.POST("/{databaseName}/collections/{collectionName}/validation").
+	ws.Route(ws.PUT("/{databaseName}/collections/{collectionName}/validation").
 		To(rcv.postValidation).
 		Doc("Post collection validation.").
 		Param(ws.HeaderParameter("Authorization", "Bearer authentication").DataType("string")).

@@ -21,4 +21,6 @@ type ValidationProperty struct {
 	ExclusiveMaximum bool          `json:"exclusiveMaximum,omitempty"`
 	ExclusiveMinimum bool          `json:"exclusiveMinimum,omitempty"`
 	UniqueItems      bool          `json:"uniqueItems,omitempty"`
+	MinItems         int           `json:"minItems,omitempty"`
+	MaxItems         int           `json:"maxItems,omitempty"`
 }

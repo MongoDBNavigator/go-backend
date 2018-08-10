@@ -5,6 +5,7 @@ import (
 	"github.com/emicklei/go-restful"
 )
 
+// Extract collection name from url path
 func ExtractCollectionName(request *restful.Request) (value.CollName, error) {
 	collName := value.CollName(request.PathParameter("collectionName"))
 
@@ -15,6 +16,7 @@ func ExtractCollectionName(request *restful.Request) (value.CollName, error) {
 	return collName, nil
 }
 
+// Extract database name from url path
 func ExtractDatabaseName(request *restful.Request) (value.DBName, error) {
 	dbName := value.DBName(request.PathParameter("databaseName"))
 
@@ -25,6 +27,7 @@ func ExtractDatabaseName(request *restful.Request) (value.DBName, error) {
 	return dbName, nil
 }
 
+// Extract documentId from url path
 func ExtractDocumentId(request *restful.Request) (value.DocId, error) {
 	docId := value.DocId(request.PathParameter("documentId"))
 
@@ -35,6 +38,7 @@ func ExtractDocumentId(request *restful.Request) (value.DocId, error) {
 	return docId, nil
 }
 
+// Extract index name from url path
 func ExtractIndex(request *restful.Request) (value.IndexName, error) {
 	indexName := value.IndexName(request.PathParameter("indexName"))
 
@@ -45,6 +49,7 @@ func ExtractIndex(request *restful.Request) (value.IndexName, error) {
 	return indexName, nil
 }
 
+// Extract all allowed parameters from url path
 func ExtractParametersFromRequest(request *restful.Request, db *value.DBName, coll *value.CollName, docId *value.DocId, index *value.IndexName) error {
 	if db != nil {
 		dbName, err := ExtractDatabaseName(request)

@@ -9,10 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	restful "github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful"
 	"gopkg.in/mgo.v2/bson"
 )
 
+// Extract skip parameter from query
 func ExtractSkip(request *restful.Request) (int, error) {
 	if len(strings.TrimSpace(request.QueryParameter("skip"))) == 0 {
 		return 0, nil
@@ -31,6 +32,7 @@ func ExtractSkip(request *restful.Request) (int, error) {
 	return skip, nil
 }
 
+// Extract limit parameter from query
 func ExtractLimit(request *restful.Request) (int, error) {
 	if len(strings.TrimSpace(request.QueryParameter("limit"))) == 0 {
 		return 10, nil
@@ -53,6 +55,7 @@ func ExtractLimit(request *restful.Request) (int, error) {
 	return limit, nil
 }
 
+// Extract sorts parameter from query
 func ExtractSort(request *restful.Request) ([]string, error) {
 	params, err := url.ParseQuery(request.Request.URL.RawQuery)
 
@@ -82,6 +85,7 @@ func ExtractSort(request *restful.Request) ([]string, error) {
 	return sorts, nil
 }
 
+// Extract filters parameter from query
 func ExtractFilter(request *restful.Request) (bson.M, error) {
 	params, err := url.ParseQuery(request.Request.URL.RawQuery)
 
@@ -112,6 +116,7 @@ func ExtractFilter(request *restful.Request) (bson.M, error) {
 	return filters, nil
 }
 
+// Parse filters parameter
 func parseFilter(data string) (bson.M, error) {
 	if !strings.Contains(data, ":") {
 		return nil, errors.New("filter[] has bad formant (field:value)")
@@ -141,10 +146,11 @@ func parseFilter(data string) (bson.M, error) {
 		return nil, err
 	}
 
-	return convertToBson(filter), nil
+	return convertFilterToBson(filter), nil
 }
 
-func convertToBson(data map[string]interface{}) bson.M {
+// Convert filter parameter to BSON
+func convertFilterToBson(data map[string]interface{}) bson.M {
 	filter := make(bson.M)
 
 	if regex, ok := data["$regex"]; ok {
@@ -165,12 +171,12 @@ func convertToBson(data map[string]interface{}) bson.M {
 		vType := reflect.TypeOf(v)
 
 		if vType.String() == "map[string]interface {}" {
-			filter[k] = convertToBson(v.(map[string]interface{}))
+			filter[k] = convertFilterToBson(v.(map[string]interface{}))
 		} else if vType.String() == "[]interface {}" {
 			vSlice := v.([]interface{})
 			filter[k] = make([]interface{}, len(vSlice))
 			for i, j := range vSlice {
-				filter[k].([]interface{})[i] = convertToBson(j.(map[string]interface{}))
+				filter[k].([]interface{})[i] = convertFilterToBson(j.(map[string]interface{}))
 			}
 		} else {
 			filter[k] = v

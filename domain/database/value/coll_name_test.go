@@ -21,3 +21,21 @@ func TestCollNameEmpty(t *testing.T) {
 	assert.Error(t, valid)
 	assert.Equal(t, err.EmptyCollName, valid)
 }
+
+func TestCollNameNotValid(t *testing.T) {
+	callName := CollName("test$")
+
+	valid := callName.Valid()
+
+	assert.Error(t, valid)
+	assert.Equal(t, err.NotValidCollName, valid)
+}
+
+func TestCollNameSystemPrefix(t *testing.T) {
+	callName := CollName("system.test")
+
+	valid := callName.Valid()
+
+	assert.Error(t, valid)
+	assert.Equal(t, err.SystemPrefixContainsCollName, valid)
+}

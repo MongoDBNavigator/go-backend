@@ -12,7 +12,23 @@ func TestValidationIndex(t *testing.T) {
 	validationLevel := value.ValidationLevel("warning")
 	properties := make([]*ValidationProperty, 1)
 
-	properties[0] = NewValidationProperty("test", true, "string", []string{}, "", 0, 0, "", 0, 0)
+	properties[0] = NewValidationProperty(
+		"test",
+		true,
+		"string",
+		[]interface{}{"test"},
+		"",
+		0,
+		0,
+		"",
+		0,
+		0,
+		0,
+		0,
+		true,
+		true,
+		true,
+	)
 
 	validation := NewValidation(validationLevel, validationAction, properties)
 

@@ -23,6 +23,8 @@ func ValidationToView(model *model.Validation) *representation.Validation {
 			UniqueItems:      prop.UniqueItems(),
 			ExclusiveMaximum: prop.ExclusiveMaximum(),
 			ExclusiveMinimum: prop.ExclusiveMinimum(),
+			MinItems:         prop.MinItems(),
+			MaxItems:         prop.MaxItems(),
 		}
 	}
 

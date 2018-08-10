@@ -39,6 +39,18 @@ type ValidationProperty struct {
 	pattern          string
 	maxLength        int
 	minLength        int
+	minItems         int
+	maxItems         int
+}
+
+// Getter for maxItems
+func (v *ValidationProperty) MaxItems() int {
+	return v.maxItems
+}
+
+// Getter for minItems
+func (v *ValidationProperty) MinItems() int {
+	return v.minItems
 }
 
 // Getter for exclusiveMinimum
@@ -129,17 +141,27 @@ func NewValidationProperty(
 	pattern string,
 	maxLength int,
 	minLength int,
+	minItems int,
+	maxItems int,
+	exclusiveMaximum bool,
+	exclusiveMinimum bool,
+	uniqueItems bool,
 ) *ValidationProperty {
 	return &ValidationProperty{
-		name:        name,
-		required:    required,
-		bsonType:    bsonType,
-		enum:        enum,
-		description: description,
-		minimum:     minimum,
-		maximum:     maximum,
-		pattern:     pattern,
-		maxLength:   maxLength,
-		minLength:   minLength,
+		name:             name,
+		required:         required,
+		bsonType:         bsonType,
+		enum:             enum,
+		description:      description,
+		minimum:          minimum,
+		maximum:          maximum,
+		pattern:          pattern,
+		maxLength:        maxLength,
+		minLength:        minLength,
+		minItems:         minItems,
+		maxItems:         maxItems,
+		exclusiveMaximum: exclusiveMaximum,
+		exclusiveMinimum: exclusiveMinimum,
+		uniqueItems:      uniqueItems,
 	}
 }
