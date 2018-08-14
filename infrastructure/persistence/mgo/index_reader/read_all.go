@@ -14,6 +14,8 @@ func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([
 		return nil, err
 	}
 
+	var partialFilterExpression interface{}
+
 	result := make([]*model.Index, len(indexes))
 
 	for i, index := range indexes {
@@ -23,6 +25,7 @@ func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([
 			index.Background,
 			index.Sparse,
 			index.Key,
+			partialFilterExpression,
 		)
 	}
 

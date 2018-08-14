@@ -33,7 +33,7 @@ func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
 
 		var collections, indexesNumber, storageSize int
 
-		if i, err := strconv.Atoi(indexesString); err == nil {
+		if i, err := strconv.Atoi(collectionsString); err == nil {
 			collections = i
 		}
 
@@ -41,11 +41,11 @@ func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
 			storageSize = i
 		}
 
-		if i, err := strconv.Atoi(collectionsString); err == nil {
+		if i, err := strconv.Atoi(indexesString); err == nil {
 			indexesNumber = i
 		}
 
-		result[i] = model.NewDatabase(name, collections, indexesNumber, storageSize)
+		result[i] = model.NewDatabase(name, storageSize, indexesNumber, collections)
 	}
 
 	return result, nil

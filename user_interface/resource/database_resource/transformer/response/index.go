@@ -7,11 +7,12 @@ import (
 
 func IndexToView(model *model.Index) *representation.Index {
 	return &representation.Index{
-		Name:       model.Name(),
-		Unique:     model.Unique(),
-		Background: model.Background(),
-		Sparse:     model.Sparse(),
-		Fields:     model.Fields(),
+		Name:                    model.Name(),
+		Unique:                  model.Unique(),
+		Background:              model.Background(),
+		Sparse:                  model.Sparse(),
+		Fields:                  model.Fields(),
+		PartialFilterExpression: model.PartialFilterExpression(),
 	}
 }
 

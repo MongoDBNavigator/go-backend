@@ -33,6 +33,7 @@ func (rcv *databaseResource) postIndex(req *restful.Request, res *restful.Respon
 		postRequest.Background,
 		postRequest.Sparse,
 		postRequest.Fields,
+		postRequest.PartialFilterExpression,
 	)
 
 	if err := rcv.indexWriter.Create(dbName, collName, index); err != nil {

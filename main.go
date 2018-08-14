@@ -17,6 +17,7 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/system_info_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
@@ -26,7 +27,6 @@ import (
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/swagger_resource"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource"
 	"github.com/emicklei/go-restful"
-	"gopkg.in/mgo.v2"
 )
 
 const (
@@ -40,6 +40,8 @@ const (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	//env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
 	username := helper.GetVar("MN_USERNAME", defaultUsername)
@@ -50,11 +52,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mongoSession, err := mgo.Dial(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
+	mongoSession, err := mgo_session.MongoDBSessionFactory(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println("Success connect to mongodb.")
 
 	defer mongoSession.Close()
 	defer func() {
@@ -120,6 +124,8 @@ func main() {
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))
 
 	server := http.Server{Addr: apiAddress, Handler: wsContainer}
+
+	log.Println("MongoDb Navigator server start listening.")
 
 	log.Fatal(server.ListenAndServe())
 }

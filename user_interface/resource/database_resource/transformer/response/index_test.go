@@ -13,8 +13,9 @@ func TestIndexToView(t *testing.T) {
 	background := true
 	sparse := true
 	fields := []string{"name"}
+	var partialFilterExpression interface{}
 
-	view := IndexToView(model.NewIndex(name, unique, background, sparse, fields))
+	view := IndexToView(model.NewIndex(name, unique, background, sparse, fields, partialFilterExpression))
 
 	assert.Equal(t, name, view.Name)
 	assert.Equal(t, unique, view.Unique)
@@ -29,8 +30,9 @@ func TestIndexesToView(t *testing.T) {
 	background := true
 	sparse := true
 	fields := []string{"name"}
+	var partialFilterExpression interface{}
 
-	index := model.NewIndex(name, unique, background, sparse, fields)
+	index := model.NewIndex(name, unique, background, sparse, fields, partialFilterExpression)
 
 	indexes := make([]*model.Index, 1)
 	indexes[0] = index

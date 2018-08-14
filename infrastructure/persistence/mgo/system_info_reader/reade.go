@@ -1,6 +1,9 @@
 package system_info_reader
 
-import "github.com/MongoDBNavigator/go-backend/domain/system/model"
+import (
+	"github.com/MongoDBNavigator/go-backend/domain/system/helper"
+	"github.com/MongoDBNavigator/go-backend/domain/system/model"
+)
 
 // Get information about server (processor architecture, mongodb version, etc.)
 func (rcv *systemInfoReader) Reade() (*model.SystemInfo, error) {
@@ -10,5 +13,5 @@ func (rcv *systemInfoReader) Reade() (*model.SystemInfo, error) {
 		return nil, err
 	}
 
-	return model.NewSystemInfo(buildInfo.Version, buildInfo.Bits, rcv.url), nil
+	return model.NewSystemInfo(buildInfo.Version, buildInfo.Bits, helper.MongoDBUrlConverter(rcv.url)), nil
 }
