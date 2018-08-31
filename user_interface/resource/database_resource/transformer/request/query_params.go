@@ -178,6 +178,12 @@ func convertFilterToBson(data map[string]interface{}) bson.M {
 			for i, j := range vSlice {
 				filter[k].([]interface{})[i] = convertFilterToBson(j.(map[string]interface{}))
 			}
+		} else if vType.String() == "string" {
+			if bson.IsObjectIdHex(v.(string)) {
+				filter[k] = bson.ObjectIdHex(v.(string))
+			} else {
+				filter[k] = v
+			}
 		} else {
 			filter[k] = v
 		}
