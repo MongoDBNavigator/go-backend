@@ -31,6 +31,7 @@ import (
 	"github.com/emicklei/go-restful"
 
 	mongo_collection_reader "github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
+	mongo_index_reader "github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
 )
 
 const (
@@ -71,6 +72,10 @@ func main() {
 	mongoCollectionReader := mongo_collection_reader.New(mongoClient)
 
 	mongoCollectionReader.ReadAll(value.DBName("test"))
+
+	mongoIndexReader := mongo_index_reader.New(mongoClient)
+
+	mongoIndexReader.ReadAll(value.DBName("test"), value.CollName("my1"))
 
 	log.Println("Success connect to mongodb.")
 

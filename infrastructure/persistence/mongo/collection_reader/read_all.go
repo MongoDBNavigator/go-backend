@@ -51,7 +51,7 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 			size = int(sizeRaw.Value().Int32())
 		}
 
-		if avgObjSizeRaw, err := collStats.Lookup("avgObjSize"); err != nil {
+		if avgObjSizeRaw, err := collStats.Lookup("avgObjSize"); err != nil && avgObjSizeRaw != nil {
 			avgObjSize = int(avgObjSizeRaw.Value().Int32())
 		}
 
