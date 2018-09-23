@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/MongoDBNavigator/go-backend/domain/database/value"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo"
 	"log"
 
 	"net/http"
@@ -27,12 +29,14 @@ import (
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/swagger_resource"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource"
 	"github.com/emicklei/go-restful"
+
+	mongo_collection_reader "github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
 )
 
 const (
 	defaultEnv             = "prod"
 	defaultJwtExp          = "24" // hours
-	defaultMongoUrl        = "127.0.0.1:27017"
+	defaultMongoUrl        = "mongodb://127.0.0.1:27017"
 	defaultUsername        = "admin"
 	defaultPassword        = "admin"
 	defaultApiAddress      = ":8080"
@@ -42,7 +46,7 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	//env := helper.GetVar("ENV", "dev")
+	env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
 	username := helper.GetVar("MN_USERNAME", defaultUsername)
 	password := helper.GetVar("MN_PASSWORD", defaultPassword)
@@ -57,6 +61,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	mongoClient, err := mongo.MongoDBClientFactory(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mongoCollectionReader := mongo_collection_reader.New(mongoClient)
+
+	mongoCollectionReader.ReadAll(value.DBName("test"))
 
 	log.Println("Success connect to mongodb.")
 
@@ -106,19 +120,19 @@ func main() {
 		recoverMiddleware,
 	).Register(wsContainer)
 
-	//if env != defaultEnv {
-	swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
+	if env != defaultEnv {
+		swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
 
-	cors := restful.CrossOriginResourceSharing{
-		AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		CookiesAllowed: false,
-		Container:      wsContainer,
+		cors := restful.CrossOriginResourceSharing{
+			AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			CookiesAllowed: false,
+			Container:      wsContainer,
+		}
+
+		wsContainer.Filter(cors.Filter)
+		wsContainer.Filter(wsContainer.OPTIONSFilter)
 	}
-
-	wsContainer.Filter(cors.Filter)
-	wsContainer.Filter(wsContainer.OPTIONSFilter)
-	//}
 
 	// Route for js app
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))

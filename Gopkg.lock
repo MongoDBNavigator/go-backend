@@ -333,6 +333,7 @@
     "github.com/emicklei/go-restful-openapi",
     "github.com/go-openapi/spec",
     "github.com/golang/mock/gomock",
+    "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/mongo",
     "github.com/stretchr/testify/assert",
     "gopkg.in/mgo.v2",
