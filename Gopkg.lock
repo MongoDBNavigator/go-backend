@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:9a7c700c28c5e39efd8da890139d8967832657f85f6d1f5530fc6fc851c841c4"
+  digest = "1:d1665c44bd5db19aaee18d1b6233c99b0b9a986e8bccb24ef54747547a48027f"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
   pruneopts = "UT"
-  revision = "975f53781597ed779763b7b65566e74c4004d8de"
+  revision = "0bcb03f4b4d0a9428594752bd2a3b9aa0a9d4bd4"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -93,12 +93,12 @@
   version = "0.15.0"
 
 [[projects]]
-  digest = "1:731022b436cdb9b4b2a53be2ead693467a1474b8b873d4f90cb424fffdc3d0ff"
+  digest = "1:c80984d4a9bb79539743aff5af91b595d84f513700150b0ed73c1697d1200d54"
   name = "github.com/go-openapi/swag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2b0bd4f193d011c203529df626a65d63cb8a79e8"
-  version = "0.15.0"
+  revision = "becd2f08beafcca035645a8a101e0e3e18140458"
+  version = "0.16.0"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -125,15 +125,16 @@
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
-  digest = "1:eaefc85d32c03e5f0c2b88ea2f79fce3d993e2c78316d21319575dd4ea9153ca"
+  digest = "1:3e551bbb3a7c0ab2a2bf4660e7fcad16db089fdcfbb44b0199e62838038623ea"
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
-  version = "1.1.4"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "v1.1.5"
 
 [[projects]]
-  digest = "1:ada518b8c338e10e0afa443d84671476d3bd1d926e13713938088e8ddbee1a3e"
+  branch = "master"
+  digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
   name = "github.com/mailru/easyjson"
   packages = [
     "buffer",
@@ -141,7 +142,7 @@
     "jwriter",
   ]
   pruneopts = "UT"
-  revision = "3fdea8d05856a0c8df22ed4bc71b3219245e4485"
+  revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -160,13 +161,14 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:c990d4427f9d6c34549935233b7034bed5460bc4db829f3cdf3392160f35dcaf"
+  digest = "1:ca4fde30b33f3f8d39ddaa544308b4bdaac1c48f290d6d5148565ff0b03a7d80"
   name = "github.com/mongodb/mongo-go-driver"
   packages = [
     "bson",
     "bson/builder",
     "bson/decimal",
     "bson/elements",
+    "bson/internal/llbson",
     "bson/objectid",
     "bson/parser",
     "bson/parser/ast",
@@ -215,8 +217,8 @@
     "mongo/updateopt",
   ]
   pruneopts = "UT"
-  revision = "b75c1ad5f277465dc7bdcc3d14c5177a89b6a4f9"
-  version = "v0.0.13"
+  revision = "e9228a40a480a5403b7256fb755ab000ff754c35"
+  version = "v0.0.14"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -259,6 +261,7 @@
   revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
+  branch = "master"
   digest = "1:465a33526e2f67923b633d1ff67999c13a41d5226ee8ae78ddc22bc41c5ec4b3"
   name = "golang.org/x/net"
   packages = [
@@ -266,7 +269,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "cffdcf672aee934982473246bc7e9a8ba446aa9b"
+  revision = "2f5d2388922f370f4355f327fcf4cfe9f5583908"
 
 [[projects]]
   branch = "master"
@@ -277,15 +280,13 @@
   revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
-  digest = "1:797f436fe0034c2d8b96aac89a302bdc8387fee2a12a1cb8953684c0bee4444d"
+  digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
     "internal/colltab",
     "internal/gen",
-    "internal/language",
-    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -299,7 +300,8 @@
     "width",
   ]
   pruneopts = "UT"
-  revision = "0605a8320aceb4207a5fb3521281e17ec2075476"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "v2"

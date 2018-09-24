@@ -1,16 +1,15 @@
 package collection_writer
 
 import (
-	"gopkg.in/mgo.v2"
-
 	"github.com/MongoDBNavigator/go-backend/domain/database/repository"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
 type collectionWriter struct {
-	db *mgo.Session
+	db *mongo.Client
 }
 
 // Constructor for collectionWriter
-func New(db *mgo.Session) repository.CollectionWriter {
+func New(db *mongo.Client) repository.CollectionWriter {
 	return &collectionWriter{db: db}
 }

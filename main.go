@@ -2,22 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo"
 	"log"
+
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo"
 
 	"net/http"
 
 	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/collection_reader"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/collection_writer"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/database_reader"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/database_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_writer"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/system_info_reader"
@@ -30,8 +25,11 @@ import (
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource"
 	"github.com/emicklei/go-restful"
 
-	mongo_collection_reader "github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
-	mongo_index_reader "github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
 )
 
 const (
@@ -69,14 +67,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mongoCollectionReader := mongo_collection_reader.New(mongoClient)
-
-	mongoCollectionReader.ReadAll(value.DBName("test"))
-
-	mongoIndexReader := mongo_index_reader.New(mongoClient)
-
-	mongoIndexReader.ReadAll(value.DBName("test"), value.CollName("my1"))
-
 	log.Println("Success connect to mongodb.")
 
 	defer mongoSession.Close()
@@ -86,16 +76,16 @@ func main() {
 		}
 	}()
 
-	databaseReader := database_reader.New(mongoSession)
-	databaseWriter := database_writer.New(mongoSession)
+	databaseReader := database_reader.New(mongoClient)
+	databaseWriter := database_writer.New(mongoClient)
 
-	collectionsReader := collection_reader.New(mongoSession)
-	collectionsWriter := collection_writer.New(mongoSession)
+	collectionsReader := collection_reader.New(mongoClient)
+	collectionsWriter := collection_writer.New(mongoClient)
 
 	documentReader := document_reader.New(mongoSession)
 	documentWriter := document_writer.New(mongoSession)
 
-	indexReader := index_reader.New(mongoSession)
+	indexReader := index_reader.New(mongoClient)
 	indexWriter := index_writer.New(mongoSession)
 
 	validationReader := validation_reader.New(mongoSession)

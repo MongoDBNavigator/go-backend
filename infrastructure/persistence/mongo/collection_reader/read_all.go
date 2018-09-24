@@ -2,6 +2,7 @@ package collection_reader
 
 import (
 	"context"
+
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -28,30 +29,28 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 		// https://docs.mongodb.com/manual/reference/command/collStats/
 		collStats, err := rcv.db.Database(string(dbName)).RunCommand(
 			context.Background(),
-			bson.NewDocument(
-				bson.EC.String("collStats", name.Value().StringValue()),
-			),
+			bson.NewDocument(bson.EC.String("collStats", name.Value().StringValue())),
 		)
 
 		if err != nil {
-			return  nil, err
+			return nil, err
 		}
 
 		var count, avgObjSize, indexesNumber, size int
 
-		if countRaw, err := collStats.Lookup("count"); err != nil {
+		if countRaw, _ := collStats.Lookup("count"); countRaw != nil {
 			count = int(countRaw.Value().Int32())
 		}
 
-		if nIndexes, err := collStats.Lookup("nindexes"); err != nil {
+		if nIndexes, _ := collStats.Lookup("nindexes"); nIndexes != nil {
 			indexesNumber = int(nIndexes.Value().Int32())
 		}
 
-		if sizeRaw, err := collStats.Lookup("size"); err != nil {
+		if sizeRaw, _ := collStats.Lookup("size"); sizeRaw != nil {
 			size = int(sizeRaw.Value().Int32())
 		}
 
-		if avgObjSizeRaw, err := collStats.Lookup("avgObjSize"); err != nil && avgObjSizeRaw != nil {
+		if avgObjSizeRaw, _ := collStats.Lookup("avgObjSize"); avgObjSizeRaw != nil {
 			avgObjSize = int(avgObjSizeRaw.Value().Int32())
 		}
 
