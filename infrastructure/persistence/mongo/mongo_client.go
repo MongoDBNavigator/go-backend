@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
@@ -12,9 +13,7 @@ func MongoDBClientFactory(url string) (*mongo.Client, error) {
 		return nil, err
 	}
 
-	err = client.Connect(context.Background())
-
-	if err != nil {
+	if err = client.Connect(context.Background()); err != nil {
 		return nil, err
 	}
 

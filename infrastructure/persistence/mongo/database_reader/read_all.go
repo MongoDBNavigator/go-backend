@@ -2,7 +2,6 @@ package database_reader
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 
@@ -14,7 +13,6 @@ import (
 func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
 	databaseNames, err := rcv.db.ListDatabaseNames(context.Background(), nil)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

@@ -15,7 +15,6 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/system_info_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource"
@@ -30,6 +29,7 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/system_info_reader"
 )
 
 const (
@@ -91,7 +91,7 @@ func main() {
 	validationReader := validation_reader.New(mongoSession)
 	validationWriter := validator_writer.New(mongoSession)
 
-	systemReader := system_info_reader.New(mongoSession, defaultMongoUrl)
+	systemReader := system_info_reader.New(mongoClient, defaultMongoUrl)
 
 	var wsContainer = restful.NewContainer()
 
