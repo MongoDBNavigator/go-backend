@@ -12,7 +12,6 @@ import (
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_reader"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/document_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
@@ -28,6 +27,7 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/document_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/system_info_reader"
 )
@@ -83,7 +83,7 @@ func main() {
 	collectionsWriter := collection_writer.New(mongoClient)
 
 	documentReader := document_reader.New(mongoSession)
-	documentWriter := document_writer.New(mongoSession)
+	documentWriter := document_writer.New(mongoClient)
 
 	indexReader := index_reader.New(mongoClient)
 	indexWriter := index_writer.New(mongoSession)
