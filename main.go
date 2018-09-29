@@ -83,6 +83,7 @@ func main() {
 	collectionsWriter := collection_writer.New(mongoClient)
 
 	documentReader := document_reader.New(mongoClient)
+	//documentReader := document_reader.New(mongoSession)
 	documentWriter := document_writer.New(mongoClient)
 
 	indexReader := index_reader.New(mongoClient)

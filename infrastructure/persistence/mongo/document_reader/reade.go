@@ -2,7 +2,9 @@ package document_reader
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"reflect"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -36,10 +38,27 @@ func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, do
 		return nil, err
 	}
 
-	var bb interface{}
+	docJson, err := document.ToExtJSONErr(false)
 
-	log.Println(document.WriteDocument(1, bb))
-	log.Println(bb)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
-	return document, nil
+	var result map[string]interface{}
+
+	if err := json.Unmarshal([]byte(docJson), &result); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	if objID, ok := result["_id"]; ok {
+		if reflect.ValueOf(objID).Kind() == reflect.Map {
+			if id, ok := objID.(map[string]interface{})["$oid"]; ok {
+				result["_id"] = id
+			}
+		}
+	}
+
+	return result, nil
 }
