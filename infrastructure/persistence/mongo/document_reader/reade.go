@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"reflect"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -53,11 +52,7 @@ func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, do
 	}
 
 	if objID, ok := result["_id"]; ok {
-		if reflect.ValueOf(objID).Kind() == reflect.Map {
-			if id, ok := objID.(map[string]interface{})["$oid"]; ok {
-				result["_id"] = id
-			}
-		}
+		result["_id"] = rcv.objectIDToScalarType(objID)
 	}
 
 	return result, nil
