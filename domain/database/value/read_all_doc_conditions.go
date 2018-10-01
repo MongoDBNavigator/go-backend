@@ -9,7 +9,7 @@ type ReadAllDocConditions struct {
 	collName CollName
 	limit    int
 	skip     int
-	sort     []string
+	sort     map[string]int
 	filter   bson.M
 }
 
@@ -21,7 +21,7 @@ func (rcv *ReadAllDocConditions) CollName() CollName {
 	return rcv.collName
 }
 
-func (rcv *ReadAllDocConditions) Sort() []string {
+func (rcv *ReadAllDocConditions) Sort() map[string]int {
 	return rcv.sort
 }
 
@@ -42,7 +42,7 @@ func NewReadAllDocConditions(
 	collName CollName,
 	limit int,
 	skip int,
-	sort []string,
+	sort map[string]int,
 	filter bson.M,
 ) *ReadAllDocConditions {
 	return &ReadAllDocConditions{

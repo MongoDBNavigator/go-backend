@@ -56,29 +56,33 @@ func ExtractLimit(request *restful.Request) (int, error) {
 }
 
 // Extract sorts parameter from query
-func ExtractSort(request *restful.Request) ([]string, error) {
+func ExtractSort(request *restful.Request) (map[string]int, error) {
 	params, err := url.ParseQuery(request.Request.URL.RawQuery)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var sorts []string
+	sorts := make(map[string]int)
 
 	if rawSorts, ok := params["sort[]"]; ok {
-		sorts = make([]string, len(rawSorts))
-
-		for i, sort := range rawSorts {
+		for _, sort := range rawSorts {
 			sort = strings.TrimSpace(sort)
 			if len(sort) == 0 {
 				return nil, errors.New("sort[] value should not be blank")
 			}
 
-			if strings.HasPrefix(sort, "-") == false {
-				sort = fmt.Sprintf("+%s", sort)
+			var direction int
+
+			if strings.HasPrefix(sort, "-") == true {
+				direction = -1
+				sort = strings.TrimPrefix("sort", "-")
+			} else {
+				direction = 1
+				sort = strings.TrimPrefix("sort", "+")
 			}
 
-			sorts[i] = sort
+			sorts[sort] = direction
 		}
 	}
 

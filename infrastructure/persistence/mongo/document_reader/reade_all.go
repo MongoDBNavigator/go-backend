@@ -18,13 +18,8 @@ func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]in
 	opts[0] = findopt.Skip(int64(conditions.Skip()))
 	opts[1] = findopt.Limit(int64(conditions.Limit()))
 
-	log.Println(conditions.Sort())
-
 	if len(conditions.Sort()) > 0 {
-		sort := map[string]int{
-			"country": -1,
-		}
-		opts = append(opts, findopt.Sort(sort))
+		opts = append(opts, findopt.Sort(conditions.Sort()))
 	}
 
 	cursor, err := rcv.db.
