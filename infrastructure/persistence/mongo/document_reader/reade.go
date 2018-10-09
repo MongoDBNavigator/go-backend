@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -19,7 +20,12 @@ func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, do
 
 	if err != nil {
 		log.Println(err)
-		element = bson.EC.String("_id", string(docId))
+		if i, err := strconv.Atoi(string(docId)); err == nil {
+			element = bson.EC.Int64("_id", int64(i))
+		} else {
+			log.Println(err)
+			element = bson.EC.String("_id", string(docId))
+		}
 	} else {
 		element = bson.EC.ObjectID("_id", id)
 	}
