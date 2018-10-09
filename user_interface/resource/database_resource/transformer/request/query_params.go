@@ -76,10 +76,10 @@ func ExtractSort(request *restful.Request) (map[string]int, error) {
 
 			if strings.HasPrefix(sort, "-") == true {
 				direction = -1
-				sort = strings.TrimPrefix("sort", "-")
+				sort = strings.TrimPrefix(sort, "-")
 			} else {
 				direction = 1
-				sort = strings.TrimPrefix("sort", "+")
+				sort = strings.TrimPrefix(sort, "+")
 			}
 
 			sorts[sort] = direction
