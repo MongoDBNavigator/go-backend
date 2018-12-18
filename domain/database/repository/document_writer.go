@@ -6,9 +6,9 @@ import "github.com/MongoDBNavigator/go-backend/domain/database/value"
 // https://martinfowler.com/eaaCatalog/repository.html
 type DocumentWriter interface {
 	// Insert document
-	Create(dbName value.DBName, collName value.CollName, doc interface{}) error
+	Create(dbName value.DBName, collName value.CollName, doc []byte) error
 	// Drop document
 	Delete(dbName value.DBName, collName value.CollName, docId value.DocId) error
 	// Update document
-	Update(dbName value.DBName, collName value.CollName, docId value.DocId, doc interface{}) error
+	Update(dbName value.DBName, collName value.CollName, docId value.DocId, doc []byte) error
 }

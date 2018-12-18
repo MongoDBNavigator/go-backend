@@ -32,6 +32,7 @@ import (
 )
 
 const (
+	defaultEnv             = "prod"
 	defaultJwtExp          = "24" // hours
 	defaultMongoUrl        = "mongodb://127.0.0.1:27017"
 	defaultUsername        = "admin"
@@ -43,6 +44,7 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
 	username := helper.GetVar("MN_USERNAME", defaultUsername)
 	password := helper.GetVar("MN_PASSWORD", defaultPassword)
@@ -111,6 +113,18 @@ func main() {
 		jwtMiddleware,
 		recoverMiddleware,
 	).Register(wsContainer)
+
+	if env != defaultEnv {
+		cors := restful.CrossOriginResourceSharing{
+			AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			CookiesAllowed: false,
+			Container:      wsContainer,
+		}
+
+		wsContainer.Filter(cors.Filter)
+		wsContainer.Filter(wsContainer.OPTIONSFilter)
+	}
 
 	// Route for js app
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))

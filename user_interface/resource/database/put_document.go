@@ -1,6 +1,7 @@
 package database
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
@@ -25,14 +26,13 @@ func (rcv *databaseResource) putDocument(req *restful.Request, res *restful.Resp
 		return
 	}
 
-	putRequest := new(interface{})
-
-	if err := req.ReadEntity(&putRequest); err != nil {
+	body, err := ioutil.ReadAll(req.Request.Body)
+	if err != nil {
 		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
 		return
 	}
 
-	if err := rcv.documentWriter.Update(dbName, collName, docId, putRequest); err != nil {
+	if err := rcv.documentWriter.Update(dbName, collName, docId, body); err != nil {
 		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
 		return
 	}

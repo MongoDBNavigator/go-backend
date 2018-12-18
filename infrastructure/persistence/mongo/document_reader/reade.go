@@ -4,35 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
 // Fetch document by ID
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
 func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, docId value.DocId) (interface{}, error) {
-	id, err := objectid.FromHex(string(docId))
-
-	var element *bson.Element
-
-	if err != nil {
-		log.Println(err)
-		if i, err := strconv.Atoi(string(docId)); err == nil {
-			element = bson.EC.Int64("_id", int64(i))
-		} else {
-			log.Println(err)
-			element = bson.EC.String("_id", string(docId))
-		}
-	} else {
-		element = bson.EC.ObjectID("_id", id)
-	}
-
+	element := helper.ConvertStringIDToBJSON(string(docId))
 	document := bson.NewDocument()
 
-	err = rcv.db.
+	err := rcv.db.
 		Database(string(dbName)).
 		Collection(string(collName)).
 		FindOne(context.Background(), bson.NewDocument(element)).
