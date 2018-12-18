@@ -15,7 +15,7 @@ func (rcv *documentReader) ReadCount(conditions *value.ReadAllDocConditions) (in
 		Count(context.Background(), nil)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return int(count), nil

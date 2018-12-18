@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement IndexReader interface
 type indexReader struct {
 	db *mongo.Client
 }

@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"log"
 	"testing"
 
 	"os"
@@ -15,7 +16,9 @@ func TestGetVar(t *testing.T) {
 	assert.Equal(t, defaultValue, GetVar(variableName, defaultValue))
 
 	originValue := "SUPPER+TEST"
-	os.Setenv(variableName, originValue)
+	if err := os.Setenv(variableName, originValue); err != nil {
+		log.Fatal(err)
+	}
 
 	assert.Equal(t, originValue, GetVar(variableName, defaultValue))
 }

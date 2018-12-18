@@ -5,8 +5,9 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement SystemInfoReader interface
 type systemInfoReader struct {
-	db *mongo.Client
+	db  *mongo.Client
 	url string
 }
 

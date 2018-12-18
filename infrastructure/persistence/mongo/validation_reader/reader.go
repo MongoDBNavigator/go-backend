@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement ValidationReader interface
 type validationReader struct {
 	db *mongo.Client
 }

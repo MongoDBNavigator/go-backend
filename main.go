@@ -15,11 +15,10 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database_resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/swagger_resource"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system_resource"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system"
 	"github.com/emicklei/go-restful"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
@@ -33,7 +32,6 @@ import (
 )
 
 const (
-	defaultEnv             = "prod"
 	defaultJwtExp          = "24" // hours
 	defaultMongoUrl        = "mongodb://127.0.0.1:27017"
 	defaultUsername        = "admin"
@@ -45,7 +43,6 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
 	username := helper.GetVar("MN_USERNAME", defaultUsername)
 	password := helper.GetVar("MN_PASSWORD", defaultPassword)
@@ -61,7 +58,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mongoClient, err := mongo.MongoDBClientFactory(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
+	mongoClient, err := mongo.NewMongoDBClient(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
 
 	if err != nil {
 		log.Fatal(err)
@@ -98,9 +95,9 @@ func main() {
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
 	recoverMiddleware := middleware.NewRecoverMiddleware()
 
-	system_resource.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
-	auth_resource.NewAuthResource(username, password, jwtExp).Register(wsContainer)
-	database_resource.NewDatabaseResource(
+	system.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
+	auth.NewAuthResource(username, password, jwtExp).Register(wsContainer)
+	database.NewDatabaseResource(
 		databaseReader,
 		databaseWriter,
 		collectionsReader,
@@ -114,20 +111,6 @@ func main() {
 		jwtMiddleware,
 		recoverMiddleware,
 	).Register(wsContainer)
-
-	if env != defaultEnv {
-		swagger_resource.NewSwaggerResource(fmt.Sprintf("http://localhost%s", apiAddress)).Register(wsContainer)
-
-		cors := restful.CrossOriginResourceSharing{
-			AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
-			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			CookiesAllowed: false,
-			Container:      wsContainer,
-		}
-
-		wsContainer.Filter(cors.Filter)
-		wsContainer.Filter(wsContainer.OPTIONSFilter)
-	}
 
 	// Route for js app
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))

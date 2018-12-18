@@ -26,15 +26,19 @@ func (rcv *documentWriter) Update(dbName value.DBName, collName value.CollName, 
 
 	if err != nil {
 		log.Println(err)
-		element = bson.EC.String("_id", string(docId))
+		element = bson.EC.Interface("_id", docId)
 	} else {
 		element = bson.EC.ObjectID("_id", id)
 	}
 
-	_, replaceErr := rcv.db.
+	_, err = rcv.db.
 		Database(string(dbName)).
 		Collection(string(collName)).
 		ReplaceOne(context.Background(), bson.NewDocument(element), document)
 
-	return replaceErr
+	if err != nil {
+		log.Println(err)
+	}
+
+	return err
 }

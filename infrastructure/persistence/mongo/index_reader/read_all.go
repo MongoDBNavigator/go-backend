@@ -4,19 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 )
-
-type indexSpec struct {
-	Name       string        "name,omitempty"
-	Unique     bool          "unique,omitempty"
-	Background bool          "background,omitempty"
-	Sparse     bool          "sparse,omitempty"
-	Key        bson.Document "key,omitempty"
-}
 
 // Returns an array of documents that describe the existing indexes on a collection.
 // https://docs.mongodb.com/manual/reference/method/db.collection.getIndexes/#db.collection.getIndexes
@@ -31,7 +21,7 @@ func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([
 	result := make([]*model.Index, 0)
 
 	for indexesCursor.Next(context.Background()) {
-		index := indexSpec{}
+		index := &indexSpec{}
 
 		if err := indexesCursor.Decode(&index); err != nil {
 			fmt.Println(err)

@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement CollectionWriter interface
 type collectionWriter struct {
 	db *mongo.Client
 }

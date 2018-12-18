@@ -39,15 +39,19 @@
 
 [[constraint]]
   name = "github.com/emicklei/go-restful-openapi"
-  version = "0.11.0"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/go-openapi/spec"
-  version = "0.15.0"
+  version = "0.17.2"
 
 [[constraint]]
   name = "github.com/golang/mock"
-  version = "1.1.1"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/mongodb/mongo-go-driver"
+  version = "0.0.17"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -60,7 +64,3 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/mongodb/mongo-go-driver"
-  version = "0.0.13"

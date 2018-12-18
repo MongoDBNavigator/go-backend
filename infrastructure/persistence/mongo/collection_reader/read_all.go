@@ -8,6 +8,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
+// Read all collections from DB
 func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, error) {
 	cursor, err := rcv.db.Database(string(dbName)).ListCollections(context.Background(), bson.NewDocument())
 
@@ -19,7 +20,7 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 
 	collection := bson.NewDocument()
 	for cursor.Next(context.Background()) {
-		collection.Reset()
+		collection.Reset() // Reset clears a document so it can be reused
 		if err := cursor.Decode(collection); err != nil {
 			return nil, err
 		}
@@ -38,18 +39,22 @@ func (rcv *collectionReader) ReadAll(dbName value.DBName) ([]*model.Collection, 
 
 		var count, avgObjSize, indexesNumber, size int
 
+		// The total uncompressed size in memory of all records in a collection
 		if countRaw, _ := collStats.Lookup("count"); countRaw != nil {
 			count = int(countRaw.Value().Int32())
 		}
 
+		// The number of indexes on the collection
 		if nIndexes, _ := collStats.Lookup("nindexes"); nIndexes != nil {
 			indexesNumber = int(nIndexes.Value().Int32())
 		}
 
+		// The total uncompressed size in memory of all records in a collection
 		if sizeRaw, _ := collStats.Lookup("size"); sizeRaw != nil {
 			size = int(sizeRaw.Value().Int32())
 		}
 
+		// The average size of an object in the collection
 		if avgObjSizeRaw, _ := collStats.Lookup("avgObjSize"); avgObjSizeRaw != nil {
 			avgObjSize = int(avgObjSizeRaw.Value().Int32())
 		}

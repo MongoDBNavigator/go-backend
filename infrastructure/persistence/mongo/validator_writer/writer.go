@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement ValidationWriter interface
 type validatorWriter struct {
 	db *mongo.Client
 }

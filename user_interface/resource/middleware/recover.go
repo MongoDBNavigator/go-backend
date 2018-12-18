@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth_resource/representation"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth/representation"
 	"github.com/emicklei/go-restful"
 )
 

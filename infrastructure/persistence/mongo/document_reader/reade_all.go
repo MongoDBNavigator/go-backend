@@ -17,15 +17,20 @@ func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]in
 	opts := make([]findopt.Find, 2)
 	opts[0] = findopt.Skip(int64(conditions.Skip()))
 	opts[1] = findopt.Limit(int64(conditions.Limit()))
+	var filterDoc *bson.Document
 
 	if len(conditions.Sort()) > 0 {
 		opts = append(opts, findopt.Sort(conditions.Sort()))
 	}
 
+	if len(conditions.Filter()) > 0 {
+		filterDoc = rcv.convertFilterToBson(conditions.Filter())
+	}
+
 	cursor, err := rcv.db.
 		Database(string(conditions.DbName())).
 		Collection(string(conditions.CollName())).
-		Find(context.Background(), nil, opts...)
+		Find(context.Background(), filterDoc, opts...)
 
 	if err != nil {
 		return nil, err

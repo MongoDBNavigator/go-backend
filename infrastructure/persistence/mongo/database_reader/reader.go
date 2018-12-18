@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Structure to implement DatabaseReader interface
 type databaseReader struct {
 	db *mongo.Client
 }
