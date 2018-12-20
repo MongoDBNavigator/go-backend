@@ -2,7 +2,9 @@ package index_reader
 
 import (
 	"context"
-	"fmt"
+	"log"
+
+	"github.com/mongodb/mongo-go-driver/bson"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
@@ -11,41 +13,65 @@ import (
 // Returns an array of documents that describe the existing indexes on a collection.
 // https://docs.mongodb.com/manual/reference/method/db.collection.getIndexes/#db.collection.getIndexes
 func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([]*model.Index, error) {
-	indexesCursor, err := rcv.db.Database(string(dbName)).Collection(string(collName)).Indexes().List(context.Background())
+	cursor, err := rcv.db.Database(string(dbName)).Collection(string(collName)).Indexes().List(context.Background())
 
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	var partialFilterExpression interface{}
 	result := make([]*model.Index, 0)
+	index := bson.NewDocument()
+	for cursor.Next(context.Background()) {
+		index.Reset()
 
-	for indexesCursor.Next(context.Background()) {
-		index := &indexSpec{}
-
-		if err := indexesCursor.Decode(&index); err != nil {
-			fmt.Println(err)
+		if err := cursor.Decode(&index); err != nil {
+			log.Println(err)
 			return nil, err
 		}
 
-		keys := make([]string, 0)
+		var (
+			name       string
+			unique     bool
+			background bool
+			sparse     bool
+		)
 
-		var i uint
-		for {
-			key, ok := index.Key.ElementAtOK(i)
-			if !ok {
-				break
-			}
+		if val := index.Lookup("name"); val != nil {
+			name = val.StringValue()
+		}
 
-			keys = append(keys, key.Key())
-			i++
+		if val := index.Lookup("background"); val != nil {
+			background = val.Boolean()
+		}
+
+		if val := index.Lookup("unique"); val != nil {
+			unique = val.Boolean()
+		}
+
+		if val := index.Lookup("sparse"); val != nil {
+			sparse = val.Boolean()
+		}
+
+		rawKeys, err := index.Lookup("key").MutableDocument().Keys(false)
+
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+
+		keys := make([]string, len(rawKeys))
+
+		for i, key := range rawKeys {
+			keys[i] = key.Name
 		}
 
 		result = append(result, model.NewIndex(
-			index.Name,
-			index.Unique,
-			index.Background,
-			index.Sparse,
+			name,
+			unique,
+			background,
+			sparse,
 			keys,
 			partialFilterExpression,
 		))

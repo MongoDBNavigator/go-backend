@@ -11,10 +11,10 @@ import (
 	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
@@ -85,7 +85,7 @@ func main() {
 	documentWriter := document_writer.New(mongoClient)
 
 	indexReader := index_reader.New(mongoClient)
-	indexWriter := index_writer.New(mongoSession)
+	indexWriter := index_writer.New(mongoClient)
 
 	validationReader := validation_reader.New(mongoSession)
 	validationWriter := validator_writer.New(mongoSession)
@@ -132,6 +132,5 @@ func main() {
 	server := http.Server{Addr: apiAddress, Handler: wsContainer}
 
 	log.Println("MongoDb Navigator server start listening.")
-
 	log.Fatal(server.ListenAndServe())
 }
