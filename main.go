@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo"
@@ -11,10 +10,9 @@ import (
 	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/mgo_session"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validation_reader"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mgo/validator_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_writer"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validation_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validator_writer"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
@@ -54,12 +52,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mongoSession, err := mgo_session.MongoDBSessionFactory(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	mongoClient, err := mongo.NewMongoDBClient(helper.GetVar("MN_MONGO_URL", defaultMongoUrl))
 
 	if err != nil {
@@ -68,10 +60,9 @@ func main() {
 
 	log.Println("Success connect to mongodb.")
 
-	defer mongoSession.Close()
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("recovered from ", r)
+			log.Println("recovered from ", r)
 		}
 	}()
 
@@ -87,8 +78,8 @@ func main() {
 	indexReader := index_reader.New(mongoClient)
 	indexWriter := index_writer.New(mongoClient)
 
-	validationReader := validation_reader.New(mongoSession)
-	validationWriter := validator_writer.New(mongoSession)
+	validationReader := validation_reader.New(mongoClient)
+	validationWriter := validator_writer.New(mongoClient)
 
 	systemReader := system_info_reader.New(mongoClient, defaultMongoUrl)
 
