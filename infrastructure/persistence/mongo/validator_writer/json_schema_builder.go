@@ -2,73 +2,78 @@ package validator_writer
 
 import (
 	"regexp"
+	"strconv"
+
+	"github.com/mongodb/mongo-go-driver/bson"
 
 	localErr "github.com/MongoDBNavigator/go-backend/domain/database/err"
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // build structure for $jsonSchema
-func buildJsonSchema(validation *model.Validation) (bson.M, error) {
-	properties := bson.M{}
-	requiredProps := make([]string, 0)
-	jsonSchema := bson.M{
-		"bsonType": "object",
-	}
+func buildJsonSchema(validation *model.Validation) (*bson.Document, error) {
+	jsonSchema := bson.NewDocument()
+	jsonSchema.Set(bson.EC.String("bsonType", "object"))
+
+	requiredFields := make([]*bson.Value, 0)
+	propertiesDocument := bson.NewDocument()
 
 	for _, prop := range validation.Properties() {
 		if prop.Required() {
-			requiredProps = append(requiredProps, prop.Name())
+			requiredFields = append(requiredFields, bson.VC.String(prop.Name()))
 		}
 
-		propValidator := bson.M{}
+		propertyDocument := bson.NewDocument()
 
 		if prop.Description() != "" {
-			propValidator["description"] = prop.Description()
+			propertyDocument.Set(bson.EC.String("description", prop.Description()))
 		}
 
 		if len(prop.Enum()) > 0 {
-			propValidator["enum"] = prop.Enum()
+			enumItems := make([]*bson.Value, len(prop.Enum()))
+			for i, item := range prop.Enum() {
+				enumItems[i] = bson.EC.Interface(strconv.Itoa(i), item).Value()
+			}
+
+			propertyDocument.Set(bson.EC.Array("enum", bson.NewArray(enumItems...)))
 		} else {
-			propValidator["bsonType"] = prop.BsonType()
+			propertyDocument.Set(bson.EC.String("bsonType", prop.BsonType()))
 
 			switch prop.BsonType() {
 			case "string":
-				if err := buildStringValidator(prop, propValidator); err != nil {
+				if err := buildStringValidator(prop, propertyDocument); err != nil {
 					return nil, err
 				}
 			case "array":
-				if err := buildArrayValidator(prop, propValidator); err != nil {
+				if err := buildArrayValidator(prop, propertyDocument); err != nil {
 					return nil, err
 				}
 			case "double", "int", "long", "decimal":
-				if err := buildNumberValidator(prop, propValidator); err != nil {
+				if err := buildNumberValidator(prop, propertyDocument); err != nil {
 					return nil, err
 				}
 			}
 		}
 
-		properties[prop.Name()] = propValidator
+		propertiesDocument.Set(bson.EC.SubDocument(prop.Name(), propertyDocument))
 	}
 
-	if len(requiredProps) > 0 {
-		jsonSchema["required"] = requiredProps
-	}
+	jsonSchema.Set(bson.EC.Array("required", bson.NewArray(requiredFields...)))
+	jsonSchema.Set(bson.EC.SubDocument("properties", propertiesDocument))
 
-	if len(properties) > 0 {
-		jsonSchema["properties"] = properties
-	}
+	document := bson.NewDocument()
+	document.Set(bson.EC.SubDocument("$jsonSchema", jsonSchema))
 
-	return jsonSchema, nil
+	return document, nil
 }
 
 // build string $jsonSchema validator
-func buildStringValidator(prop *model.ValidationProperty, propValidator bson.M) error {
+func buildStringValidator(prop *model.ValidationProperty, propValidator *bson.Document) error {
 	if prop.Pattern() != "" {
 		if _, err := regexp.Compile(prop.Pattern()); err != nil {
 			return err
 		}
-		propValidator["pattern"] = prop.Pattern()
+		propValidator.Set(bson.EC.String("pattern", prop.Pattern()))
 	}
 
 	if prop.MinLength() != 0 && prop.MaxLength() != 0 && prop.MinLength() > prop.MaxLength() {
@@ -76,50 +81,50 @@ func buildStringValidator(prop *model.ValidationProperty, propValidator bson.M) 
 	}
 
 	if prop.MinLength() != 0 {
-		propValidator["minLength"] = prop.MinLength()
+		propValidator.Set(bson.EC.Int32("minLength", int32(prop.MinLength())))
 	}
 
 	if prop.MaxLength() != 0 {
-		propValidator["maxLength"] = prop.MaxLength()
+		propValidator.Set(bson.EC.Int32("maxLength", int32(prop.MaxLength())))
 	}
 
 	return nil
 }
 
 // build numbers $jsonSchema validator
-func buildNumberValidator(prop *model.ValidationProperty, propValidator bson.M) error {
+func buildNumberValidator(prop *model.ValidationProperty, propValidator *bson.Document) error {
 	if prop.Minimum() != 0 && prop.Maximum() != 0 && prop.Minimum() > prop.Maximum() {
 		return localErr.MinimumGreatMaximum
 	}
 
 	if prop.Minimum() != 0 {
-		propValidator["minimum"] = prop.Minimum()
-		propValidator["exclusiveMinimum"] = prop.ExclusiveMinimum()
+		propValidator.Set(bson.EC.Int32("minimum", int32(prop.Minimum())))
+		propValidator.Set(bson.EC.Boolean("exclusiveMinimum", prop.ExclusiveMinimum()))
 	}
 
 	if prop.Maximum() != 0 {
-		propValidator["maximum"] = prop.Maximum()
-		propValidator["exclusiveMaximum"] = prop.ExclusiveMaximum()
+		propValidator.Set(bson.EC.Int32("maximum", int32(prop.Maximum())))
+		propValidator.Set(bson.EC.Boolean("exclusiveMaximum", prop.ExclusiveMaximum()))
 	}
 
 	return nil
 }
 
 // build arrays $jsonSchema validator
-func buildArrayValidator(prop *model.ValidationProperty, propValidator bson.M) error {
+func buildArrayValidator(prop *model.ValidationProperty, propValidator *bson.Document) error {
 	if prop.MinItems() != 0 && prop.MaxItems() != 0 && prop.MinItems() > prop.MaxItems() {
 		return localErr.MinItemsGreatMaxItems
 	}
 
 	if prop.MinItems() != 0 {
-		propValidator["minItems"] = prop.MinItems()
+		propValidator.Set(bson.EC.Int32("minItems", int32(prop.MinItems())))
 	}
 
 	if prop.MaxItems() != 0 {
-		propValidator["maxItems"] = prop.MaxItems()
+		propValidator.Set(bson.EC.Int32("maxItems", int32(prop.MaxItems())))
 	}
 
-	propValidator["uniqueItems"] = prop.UniqueItems()
+	propValidator.Set(bson.EC.Boolean("uniqueItems", prop.UniqueItems()))
 
 	return nil
 }

@@ -18,13 +18,13 @@ func (rcv *validatorWriter) Write(dbName value.DBName, collName value.CollName, 
 		return err
 	}
 
-	log.Println(jsonSchema)
-
 	_, err = rcv.db.Database(string(dbName)).RunCommand(
 		context.Background(),
 		bson.NewDocument(
 			bson.EC.String("collMod", string(collName)),
-			//bson.EC.SubDocument("validator", string(collName)),
+			bson.EC.SubDocument("validator", jsonSchema),
+			bson.EC.String("validationLevel", string(validation.ValidationLevel())),
+			bson.EC.String("validationAction", string(validation.ValidationAction())),
 		),
 	)
 

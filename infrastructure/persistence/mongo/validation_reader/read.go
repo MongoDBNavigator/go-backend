@@ -66,6 +66,9 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 
 	var jsonSchema bson.Reader
 
+	// MongoDB allowed validation:
+	// - with $jsonSchema property
+	// - without $jsonSchema property
 	if element, err := validator.Value().ReaderDocument().Lookup("$jsonSchema"); err == nil {
 		jsonSchema = element.Value().ReaderDocument()
 	} else {
@@ -74,6 +77,7 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 
 	var requiredFields []string
 
+	// collect required fields
 	if element, err := jsonSchema.Lookup("required"); err == nil {
 		requiredFields = make([]string, element.Value().MutableArray().Len())
 		iterator, err := element.Value().MutableArray().Iterator()
@@ -123,8 +127,6 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 			minItems         int
 			maxItems         int
 		)
-
-		log.Println(propIterator.Element())
 
 		for _, v := range requiredFields {
 			if v == propIterator.Element().Key() {
