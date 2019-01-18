@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
@@ -22,9 +22,9 @@ func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([
 
 	var partialFilterExpression interface{}
 	result := make([]*model.Index, 0)
-	index := bson.NewDocument()
+
 	for cursor.Next(context.Background()) {
-		index.Reset()
+		var index bsonx.Doc
 
 		if err := cursor.Decode(&index); err != nil {
 			log.Println(err)
@@ -38,43 +38,36 @@ func (rcv *indexReader) ReadAll(dbName value.DBName, collName value.CollName) ([
 			sparse     bool
 		)
 
-		if val := index.Lookup("name"); val != nil {
+		if val, err := index.LookupErr("name"); err == nil {
 			name = val.StringValue()
 		}
 
-		if val := index.Lookup("background"); val != nil {
+		if val, err := index.LookupErr("background"); err == nil {
 			background = val.Boolean()
 		}
 
-		if val := index.Lookup("unique"); val != nil {
+		if val, err := index.LookupErr("unique"); err == nil {
 			unique = val.Boolean()
 		}
 
-		if val := index.Lookup("sparse"); val != nil {
+		if val, err := index.LookupErr("sparse"); err == nil {
 			sparse = val.Boolean()
 		}
 
-		rawKeys, err := index.Lookup("key").MutableDocument().Keys(false)
+		rawKeys, err := index.LookupErr("key")
 
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
 
-		keys := make([]string, len(rawKeys))
+		keys := make([]string, len(rawKeys.Document()))
 
-		for i, key := range rawKeys {
-			keys[i] = key.Name
+		for i, key := range rawKeys.Document() {
+			keys[i] = key.Key
 		}
 
-		result = append(result, model.NewIndex(
-			name,
-			unique,
-			background,
-			sparse,
-			keys,
-			partialFilterExpression,
-		))
+		result = append(result, model.NewIndex(name, unique, background, sparse, keys, partialFilterExpression))
 	}
 
 	return result, nil

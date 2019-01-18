@@ -2,18 +2,19 @@ package document_writer
 
 import (
 	"context"
-
-	"github.com/mongodb/mongo-go-driver/bson"
+	"log"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // Insert new document
 // https://docs.mongodb.com/manual/tutorial/insert-documents/
 func (rcv *documentWriter) Create(dbName value.DBName, collName value.CollName, doc []byte) error {
-	document := bson.NewDocument()
+	document := bson.D{}
 
-	if err := bson.UnmarshalExtJSON(doc, true, document); err != nil {
+	if err := bson.UnmarshalExtJSON(doc, false, &document); err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -21,6 +22,10 @@ func (rcv *documentWriter) Create(dbName value.DBName, collName value.CollName, 
 		Database(string(dbName)).
 		Collection(string(collName)).
 		InsertOne(context.Background(), document)
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	return err
 }

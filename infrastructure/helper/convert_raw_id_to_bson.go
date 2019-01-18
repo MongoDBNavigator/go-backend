@@ -5,24 +5,25 @@ import (
 	"strconv"
 
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // Convert string document ID representation to bson.Element
-func ConvertStringIDToBJSON(docID string) *bson.Element {
-	id, err := objectid.FromHex(docID)
-	var element *bson.Element
+// https://docs.mongodb.com/manual/reference/method/ObjectId/
+func ConvertStringIDToBJSON(docID string) *bson.D {
+	id, err := primitive.ObjectIDFromHex(docID)
+	var element *bson.D
 
 	if err != nil {
 		log.Println(err)
 		if i, err := strconv.Atoi(docID); err == nil {
-			element = bson.EC.Int64("_id", int64(i))
+			element = &bson.D{{"_id", i}}
 		} else {
 			log.Println(err)
-			element = bson.EC.String("_id", docID)
+			element = &bson.D{{"_id", docID}}
 		}
 	} else {
-		element = bson.EC.ObjectID("_id", id)
+		element = &bson.D{{"_id", id}}
 	}
 
 	return element

@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/mongodb/mongo-go-driver/bson"
+
 	"github.com/emicklei/go-restful"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func TestExtractSkipSuccess(t *testing.T) {

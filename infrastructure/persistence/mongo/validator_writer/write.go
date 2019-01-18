@@ -18,19 +18,19 @@ func (rcv *validatorWriter) Write(dbName value.DBName, collName value.CollName, 
 		return err
 	}
 
-	_, err = rcv.db.Database(string(dbName)).RunCommand(
+	collModResult := rcv.db.Database(string(dbName)).RunCommand(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.String("collMod", string(collName)),
-			bson.EC.SubDocument("validator", jsonSchema),
-			bson.EC.String("validationLevel", string(validation.ValidationLevel())),
-			bson.EC.String("validationAction", string(validation.ValidationAction())),
-		),
+		bson.D{
+			{"collMod", string(collName)},
+			{"validator", jsonSchema},
+			{"validationLevel", string(validation.ValidationLevel())},
+			{"validationAction", string(validation.ValidationAction())},
+		},
 	)
 
-	if err != nil {
-		log.Println(err)
+	if collModResult.Err() != nil {
+		log.Println(collModResult.Err())
 	}
 
-	return err
+	return collModResult.Err()
 }

@@ -3,16 +3,19 @@ package system_info_reader
 import (
 	"context"
 	"errors"
+	"log"
+
+	"github.com/mongodb/mongo-go-driver/bson"
 
 	"github.com/MongoDBNavigator/go-backend/domain/system/helper"
 	"github.com/MongoDBNavigator/go-backend/domain/system/model"
-	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // Get information about server (processor architecture, mongodb version, etc.)
 func (rcv *systemInfoReader) Reade() (*model.SystemInfo, error) {
-	databaseNames, err := rcv.db.ListDatabaseNames(context.Background(), nil)
+	databaseNames, err := rcv.db.ListDatabaseNames(context.Background(), bson.D{})
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -20,30 +23,33 @@ func (rcv *systemInfoReader) Reade() (*model.SystemInfo, error) {
 		return nil, errors.New("no available databases")
 	}
 
-	buildInfo, err := rcv.db.Database(databaseNames[0]).RunCommand(
+	buildInfoResult := rcv.db.Database(databaseNames[0]).RunCommand(
 		context.Background(),
-		bson.NewDocument(bson.EC.Int32("buildInfo", 1)),
+		bson.D{{"buildInfo", 1}},
 	)
 
+	if buildInfoResult.Err() != nil {
+		log.Println(err)
+		return nil, buildInfoResult.Err()
+	}
+
+	raw, err := buildInfoResult.DecodeBytes()
+
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
-	version, err := buildInfo.Lookup("version")
+	var version string
+	var bits int
 
-	if err != nil {
-		return nil, err
+	if versionRaw, err := raw.LookupErr("version"); err == nil {
+		version = versionRaw.StringValue()
 	}
 
-	bits, err := buildInfo.Lookup("bits")
-
-	if err != nil {
-		return nil, err
+	if bitsRaw, err := raw.LookupErr("bits"); err == nil {
+		bits = int(bitsRaw.Int32())
 	}
 
-	return model.NewSystemInfo(
-		version.Value().StringValue(),
-		int(bits.Value().Int32()),
-		helper.MongoDBUrlConverter(rcv.url),
-	), nil
+	return model.NewSystemInfo(version, bits, helper.MongoDBUrlConverter(rcv.url)), nil
 }

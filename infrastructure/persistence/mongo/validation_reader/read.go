@@ -4,9 +4,10 @@ import (
 	"context"
 	"log"
 
+	"github.com/mongodb/mongo-go-driver/bson"
+
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // Read method to read $jsonSchema validation
@@ -14,103 +15,102 @@ import (
 // https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/#jsonschema
 // http://json-schema.org/
 func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) (*model.Validation, error) {
-	reader, err := rcv.db.Database(string(dbName)).RunCommand(
+	listCollectionsResult := rcv.db.Database(string(dbName)).RunCommand(
 		context.Background(),
-		bson.NewDocument(
-			bson.EC.Int32("listCollections", 1),
-			bson.EC.SubDocument("filter", bson.NewDocument(
-				bson.EC.String("name", string(collName)),
-			)),
-		),
+		bson.D{
+			{"listCollections", 1},
+			{"filter", bson.D{{"name", string(collName)}}},
+		},
 	)
 
+	if listCollectionsResult.Err() != nil {
+		log.Println(listCollectionsResult.Err())
+		return nil, listCollectionsResult.Err()
+	}
+
+	raw, err := listCollectionsResult.DecodeBytes()
+
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	cursor, err := reader.Lookup("cursor")
-
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	firstBatch, err := cursor.Value().ReaderDocument().Lookup("firstBatch")
-
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	data, err := firstBatch.Value().MutableArray().Lookup(0)
+	cursor, err := raw.LookupErr("cursor")
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	options, err := data.ReaderDocument().Lookup("options")
+	firstBatch, err := cursor.Document().LookupErr("firstBatch")
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	validator, err := options.Value().ReaderDocument().Lookup("validator")
+	data, err := firstBatch.Array().IndexErr(0)
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	var jsonSchema bson.Reader
+	options, err := data.Value().Document().LookupErr("options")
 
-	// MongoDB allowed validation:
-	// - with $jsonSchema property
-	// - without $jsonSchema property
-	if element, err := validator.Value().ReaderDocument().Lookup("$jsonSchema"); err == nil {
-		jsonSchema = element.Value().ReaderDocument()
-	} else {
-		jsonSchema = validator.Value().ReaderDocument()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	validator, err := options.Document().LookupErr("validator")
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	jsonSchema, err := validator.Document().LookupErr("$jsonSchema")
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
 	}
 
 	var requiredFields []string
 
 	// collect required fields
-	if element, err := jsonSchema.Lookup("required"); err == nil {
-		requiredFields = make([]string, element.Value().MutableArray().Len())
-		iterator, err := element.Value().MutableArray().Iterator()
+	if required, err := jsonSchema.Document().LookupErr("required"); err == nil {
+		elements, err := required.Array().Elements()
 
 		if err != nil {
 			log.Println(err)
 			return nil, err
 		}
 
-		i := 0
-		for iterator.Next() {
-			requiredFields[i] = iterator.Value().StringValue()
-			i++
+		requiredFields = make([]string, len(elements))
+
+		for i, e := range elements {
+			requiredFields[i] = e.Value().StringValue()
 		}
 	}
 
-	prop, err := jsonSchema.Lookup("properties")
+	props, err := jsonSchema.Document().LookupErr("properties")
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	propIterator, err := prop.Value().ReaderDocument().Iterator()
+	rawProps, err := props.Document().Elements()
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	properties := make([]*model.ValidationProperty, 0)
+	properties := make([]*model.ValidationProperty, len(rawProps))
 
-	for propIterator.Next() {
+	for i, p := range rawProps {
 		var (
 			required         bool
 			bsonType         string
@@ -129,73 +129,72 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 		)
 
 		for _, v := range requiredFields {
-			if v == propIterator.Element().Key() {
+			if v == p.Key() {
 				required = true
 				break
 			}
 		}
 
-		elementReader := propIterator.Element().Value().ReaderDocument()
-
-		if element, err := elementReader.Lookup("bsonType"); err == nil {
-			bsonType = element.Value().StringValue()
+		if element, err := p.Value().Document().LookupErr("bsonType"); err == nil {
+			bsonType = element.StringValue()
 		}
 
-		if element, err := elementReader.Lookup("description"); err == nil {
-			description = element.Value().StringValue()
+		if element, err := p.Value().Document().LookupErr("description"); err == nil {
+			description = element.StringValue()
 		}
 
-		if element, err := elementReader.Lookup("pattern"); err == nil {
-			pattern = element.Value().StringValue()
+		if element, err := p.Value().Document().LookupErr("pattern"); err == nil {
+			pattern = element.StringValue()
 		}
 
-		if element, err := elementReader.Lookup("minimum"); err == nil {
-			minimum = int(element.Value().Int32())
+		if element, err := p.Value().Document().LookupErr("minimum"); err == nil {
+			minimum = int(element.Int32())
 		}
 
-		if element, err := elementReader.Lookup("maximum"); err == nil {
-			maximum = int(element.Value().Int32())
+		if element, err := p.Value().Document().LookupErr("maximum"); err == nil {
+			maximum = int(element.Int32())
 		}
 
-		if element, err := elementReader.Lookup("maxLength"); err == nil {
-			maxLength = int(element.Value().Int32())
+		if element, err := p.Value().Document().LookupErr("maxLength"); err == nil {
+			maxLength = int(element.Int32())
 		}
 
-		if element, err := elementReader.Lookup("minLength"); err == nil {
-			minLength = int(element.Value().Int32())
+		if element, err := p.Value().Document().LookupErr("minLength"); err == nil {
+			minLength = int(element.Int32())
 		}
 
-		if element, err := elementReader.Lookup("uniqueItems"); err == nil {
-			uniqueItems = element.Value().Boolean()
+		if element, err := p.Value().Document().LookupErr("uniqueItems"); err == nil {
+			uniqueItems = element.Boolean()
 		}
 
-		if element, err := elementReader.Lookup("exclusiveMaximum"); err == nil {
-			exclusiveMaximum = element.Value().Boolean()
+		if element, err := p.Value().Document().LookupErr("exclusiveMaximum"); err == nil {
+			exclusiveMaximum = element.Boolean()
 		}
 
-		if element, err := elementReader.Lookup("exclusiveMinimum"); err == nil {
-			exclusiveMinimum = element.Value().Boolean()
+		if element, err := p.Value().Document().LookupErr("exclusiveMinimum"); err == nil {
+			exclusiveMinimum = element.Boolean()
 		}
 
-		if element, err := elementReader.Lookup("enum"); err == nil {
-			enum = make([]interface{}, element.Value().MutableArray().Len())
-
-			iterator, err := element.Value().MutableArray().Iterator()
+		if element, err := p.Value().Document().LookupErr("enum"); err == nil {
+			rawEnums, err := element.Document().Elements()
 
 			if err != nil {
 				log.Println(err)
 				return nil, err
 			}
+			enum = make([]interface{}, len(rawEnums))
 
-			i := 0
-			for iterator.Next() {
-				enum[i] = iterator.Value().Interface()
-				i++
+			for i, e := range rawEnums {
+				if e.Value().IsNumber() {
+					enum[i] = e.Value().Decimal128()
+				} else {
+					enum[i] = e.Value().StringValue()
+				}
 			}
 		}
 
-		properties = append(properties, model.NewValidationProperty(
-			propIterator.Element().Key(),
+		properties[i] = model.NewValidationProperty(
+			p.Key(),
 			required,
 			bsonType,
 			enum,
@@ -210,7 +209,7 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 			exclusiveMaximum,
 			exclusiveMinimum,
 			uniqueItems,
-		))
+		)
 	}
 
 	// The validationLevel option determines which operations MongoDB applies the validation rules:
@@ -222,12 +221,12 @@ func (rcv *validationReader) Read(dbName value.DBName, collName value.CollName) 
 	// - If the validationAction is warn, MongoDB logs any violations but allows the insertion or update to proceed.
 	var validationAction value.ValidationAction
 
-	if element, err := options.Value().ReaderDocument().Lookup("validationLevel"); err == nil {
-		validationLevel = value.ValidationLevel(element.Value().StringValue())
+	if element, err := options.Document().LookupErr("validationLevel"); err == nil {
+		validationLevel = value.ValidationLevel(element.StringValue())
 	}
 
-	if element, err := options.Value().ReaderDocument().Lookup("validationAction"); err == nil {
-		validationAction = value.ValidationAction(element.Value().StringValue())
+	if element, err := options.Document().LookupErr("validationAction"); err == nil {
+		validationAction = value.ValidationAction(element.StringValue())
 	}
 
 	return model.NewValidation(validationLevel, validationAction, properties), nil

@@ -2,6 +2,9 @@ package document_reader
 
 import (
 	"context"
+	"log"
+
+	"github.com/mongodb/mongo-go-driver/bson"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 )
@@ -12,9 +15,10 @@ func (rcv *documentReader) ReadCount(conditions *value.ReadAllDocConditions) (in
 	count, err := rcv.db.
 		Database(string(conditions.DbName())).
 		Collection(string(conditions.CollName())).
-		Count(context.Background(), nil)
+		Count(context.Background(), bson.D{})
 
 	if err != nil {
+		log.Println(err)
 		return 0, err
 	}
 

@@ -5,23 +5,25 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo/findopt"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 // Fetch documents with pagination and filters
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
 func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]interface{}, error) {
-	opts := make([]findopt.Find, 2)
-	opts[0] = findopt.Skip(int64(conditions.Skip()))
-	opts[1] = findopt.Limit(int64(conditions.Limit()))
-	var filterDoc *bson.Document
+	opts := options.Find()
+	opts.SetSkip(int64(conditions.Skip()))
+	opts.SetLimit(int64(conditions.Skip()))
 
 	if len(conditions.Sort()) > 0 {
-		opts = append(opts, findopt.Sort(conditions.Sort()))
+		opts.SetSort(conditions.Sort())
 	}
+
+	var filterDoc bsonx.Doc
 
 	if len(conditions.Filter()) > 0 {
 		filterDoc = rcv.convertFilterToBson(conditions.Filter())
@@ -30,23 +32,24 @@ func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]in
 	cursor, err := rcv.db.
 		Database(string(conditions.DbName())).
 		Collection(string(conditions.CollName())).
-		Find(context.Background(), filterDoc, opts...)
+		Find(context.Background(), filterDoc, opts)
 
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	var result []interface{}
-	document := bson.NewDocument()
 
-	for cursor.Next(nil) {
-		document.Reset()
-		if err := cursor.Decode(document); err != nil {
+	for cursor.Next(context.Background()) {
+		var document bsonx.Doc
+
+		if err := cursor.Decode(&document); err != nil {
 			log.Println(err)
 			return nil, err
 		}
 
-		docJson, err := document.ToExtJSONErr(false)
+		raw, err := bson.MarshalExtJSON(document, false, false)
 
 		if err != nil {
 			log.Println(err)
@@ -55,7 +58,7 @@ func (rcv *documentReader) ReadAll(conditions *value.ReadAllDocConditions) ([]in
 
 		var doc map[string]interface{}
 
-		if err := json.Unmarshal([]byte(docJson), &doc); err != nil {
+		if err := json.Unmarshal(raw, &doc); err != nil {
 			log.Println(err)
 			return nil, err
 		}

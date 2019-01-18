@@ -4,42 +4,38 @@ import (
 	"context"
 	"log"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 // Creates index on collections.
 // https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/
 func (rcv *indexWriter) Create(dbName value.DBName, collName value.CollName, index *model.Index) error {
-	keys := bson.NewDocument()
+	keys := bsonx.Doc{}
 
 	for _, indexName := range index.Fields() {
-		keys.Set(bson.EC.Int32(indexName, 1))
+		keys = keys.Append(indexName, bsonx.Int32(1))
 	}
 
-	result, err := rcv.db.
+	_, err := rcv.db.
 		Database(string(dbName)).
 		Collection(string(collName)).
 		Indexes().
 		CreateOne(
 			context.Background(),
 			mongo.IndexModel{
-				Keys: keys,
-				Options: mongo.
-					NewIndexOptionsBuilder().
-					Name(index.Name()).
-					Unique(index.Unique()).
-					Background(index.Background()).
-					Sparse(index.Sparse()).
-					Build(),
+				Keys: &keys,
+				Options: options.Index().
+					SetName(index.Name()).
+					SetUnique(index.Unique()).
+					SetBackground(index.Background()).
+					SetSparse(index.Sparse()),
 			},
 		)
-
-	log.Println(result)
 
 	if err != nil {
 		log.Println(err)

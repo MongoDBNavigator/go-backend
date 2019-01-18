@@ -3,8 +3,9 @@ package value
 import (
 	"testing"
 
+	"github.com/mongodb/mongo-go-driver/bson"
+
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func TestNewReadAllDocConditions(t *testing.T) {

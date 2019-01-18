@@ -1,16 +1,12 @@
 package value
 
-import (
-	"gopkg.in/mgo.v2/bson"
-)
-
 type ReadAllDocConditions struct {
 	dbName   DBName
 	collName CollName
 	limit    int
 	skip     int
 	sort     map[string]int
-	filter   bson.M
+	filter   []byte
 }
 
 func (rcv *ReadAllDocConditions) DbName() DBName {
@@ -33,7 +29,7 @@ func (rcv *ReadAllDocConditions) Limit() int {
 	return rcv.limit
 }
 
-func (rcv *ReadAllDocConditions) Filter() bson.M {
+func (rcv *ReadAllDocConditions) Filter() []byte {
 	return rcv.filter
 }
 
@@ -43,7 +39,7 @@ func NewReadAllDocConditions(
 	limit int,
 	skip int,
 	sort map[string]int,
-	filter bson.M,
+	filter []byte,
 ) *ReadAllDocConditions {
 	return &ReadAllDocConditions{
 		dbName:   dbName,

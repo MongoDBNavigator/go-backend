@@ -14,36 +14,36 @@ import (
 // https://docs.mongodb.com/manual/reference/method/db.collection.find/
 func (rcv *documentReader) Read(dbName value.DBName, collName value.CollName, docId value.DocId) (interface{}, error) {
 	element := helper.ConvertStringIDToBJSON(string(docId))
-	document := bson.NewDocument()
+	document := bson.D{}
 
 	err := rcv.db.
 		Database(string(dbName)).
 		Collection(string(collName)).
-		FindOne(context.Background(), bson.NewDocument(element)).
-		Decode(document)
+		FindOne(context.Background(), element).
+		Decode(&document)
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	docJson, err := document.ToExtJSONErr(false)
+	raw, err := bson.MarshalExtJSON(document, false, false)
 
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	var result map[string]interface{}
+	var doc map[string]interface{}
 
-	if err := json.Unmarshal([]byte(docJson), &result); err != nil {
+	if err := json.Unmarshal(raw, &doc); err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	if objID, ok := result["_id"]; ok {
-		result["_id"] = rcv.objectIDToScalarType(objID)
+	if objID, ok := doc["_id"]; ok {
+		doc["_id"] = rcv.objectIDToScalarType(objID)
 	}
 
-	return result, nil
+	return doc, nil
 }

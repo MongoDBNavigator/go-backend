@@ -6,6 +6,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// https://www.compose.com/articles/mongodb-and-go-moving-on-from-mgo/
 func NewMongoDBClient(url string) (*mongo.Client, error) {
 	client, err := mongo.NewClient(url)
 

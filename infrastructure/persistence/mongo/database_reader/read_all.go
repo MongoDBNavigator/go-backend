@@ -10,7 +10,7 @@ import (
 // Returns a document that lists all databases and returns basic database statistics.
 // https://docs.mongodb.com/manual/reference/command/listDatabases/
 func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
-	databaseNames, err := rcv.db.ListDatabaseNames(context.Background(), nil)
+	databaseNames, err := rcv.db.ListDatabaseNames(context.Background(), bson.D{})
 	if err != nil {
 		return nil, err
 	}
@@ -18,10 +18,16 @@ func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
 	result := make([]*model.Database, len(databaseNames))
 
 	for i, name := range databaseNames {
-		dbStats, err := rcv.db.Database(name).RunCommand(
+		dbStatsResult := rcv.db.Database(name).RunCommand(
 			context.Background(),
-			bson.NewDocument(bson.EC.Int32("dbStats", 1)),
+			bson.D{{"dbStats", 1}},
 		)
+
+		if dbStatsResult.Err() != nil {
+			return nil, dbStatsResult.Err()
+		}
+
+		raw, err := dbStatsResult.DecodeBytes()
 
 		if err != nil {
 			return nil, err
@@ -30,18 +36,18 @@ func (rcv *databaseReader) ReadAll() ([]*model.Database, error) {
 		var collections, indexesNumber, storageSize int
 
 		// Contains a count of the number of collections in that database.
-		if collectionsRaw, _ := dbStats.Lookup("collections"); collectionsRaw != nil {
-			collections = int(collectionsRaw.Value().Int32())
+		if collectionsRaw, err := raw.LookupErr("collections"); err == nil {
+			collections = int(collectionsRaw.Int32())
 		}
 
 		// Contains a count of the total number of indexes across all collections in the database.
-		if indexes, _ := dbStats.Lookup("indexes"); indexes != nil {
-			indexesNumber = int(indexes.Value().Int32())
+		if indexes, err := raw.LookupErr("indexes"); err == nil {
+			indexesNumber = int(indexes.Int32())
 		}
 
 		// The total amount of space allocated to collections in this database for document storage.
-		if storageSizeRaw, _ := dbStats.Lookup("storageSize"); storageSizeRaw != nil {
-			storageSize = int(storageSizeRaw.Value().Double())
+		if storageSizeRaw, err := raw.LookupErr("storageSize"); err == nil {
+			storageSize = int(storageSizeRaw.Double())
 		}
 
 		result[i] = model.NewDatabase(name, storageSize, indexesNumber, collections)
