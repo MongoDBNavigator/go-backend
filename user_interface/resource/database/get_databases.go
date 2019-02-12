@@ -3,19 +3,17 @@ package database
 import (
 	"net/http"
 
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/transformer/response"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to get databases list in json
-func (rcv *databaseResource) getDatabases(req *restful.Request, res *restful.Response) {
+func (rcv *databaseResource) getDatabases(w http.ResponseWriter, r *http.Request) {
 	databases, err := rcv.databaseReader.ReadAll()
 
 	if err != nil {
-		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
-	res.WriteEntity(response.DatabasesToView(databases))
+	rcv.writeResponse(w, http.StatusOK, response.DatabasesToView(databases))
 }

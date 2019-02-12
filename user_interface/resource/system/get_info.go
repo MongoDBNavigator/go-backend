@@ -1,20 +1,28 @@
 package system
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system/transformer"
-	"github.com/emicklei/go-restful"
 )
 
-func (rcv *systemResource) getInfo(request *restful.Request, response *restful.Response) {
+// Get system info (version, CPU architecture, etc.)
+func (rcv *systemResource) getInfo(w http.ResponseWriter, r *http.Request) {
 	info, err := rcv.systemInfoReader.Reade()
 
 	if err != nil {
-		response.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		if err := json.NewEncoder(w).Encode(representation.Error{Message: err.Error()}); err != nil {
+			log.Println(err)
+		}
 		return
 	}
 
-	response.WriteEntity(transformer.InfoToView(info))
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(transformer.InfoToView(info)); err != nil {
+		log.Println(err)
+	}
 }

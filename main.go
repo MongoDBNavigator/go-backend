@@ -3,6 +3,10 @@ package main
 import (
 	"log"
 
+	"github.com/gorilla/handlers"
+
+	"github.com/gorilla/mux"
+
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo"
 
 	"net/http"
@@ -10,15 +14,6 @@ import (
 	"strconv"
 
 	"github.com/MongoDBNavigator/go-backend/infrastructure/helper"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_writer"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validation_reader"
-	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validator_writer"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system"
-	"github.com/emicklei/go-restful"
-
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/collection_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/database_reader"
@@ -26,11 +21,17 @@ import (
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/document_reader"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/document_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/index_writer"
 	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/system_info_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validation_reader"
+	"github.com/MongoDBNavigator/go-backend/infrastructure/persistence/mongo/validator_writer"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
+	"github.com/MongoDBNavigator/go-backend/user_interface/resource/system"
 )
 
 const (
-	defaultEnv             = "prod"
 	defaultJwtExp          = "24" // hours
 	defaultMongoUrl        = "mongodb://127.0.0.1:27017"
 	defaultUsername        = "admin"
@@ -42,7 +43,6 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	env := helper.GetVar("ENV", "dev")
 	apiAddress := helper.GetVar("MN_PORT", defaultApiAddress)
 	username := helper.GetVar("MN_USERNAME", defaultUsername)
 	password := helper.GetVar("MN_PASSWORD", defaultPassword)
@@ -83,7 +83,8 @@ func main() {
 
 	systemReader := system_info_reader.New(mongoClient, defaultMongoUrl)
 
-	var wsContainer = restful.NewContainer()
+	wsContainer := mux.NewRouter()
+	wsContainer.Use(middleware.NewContentTypeMiddleware().Handle) // globally content type
 
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
 	recoverMiddleware := middleware.NewRecoverMiddleware()
@@ -105,23 +106,9 @@ func main() {
 		recoverMiddleware,
 	).Register(wsContainer)
 
-	if env != defaultEnv {
-		cors := restful.CrossOriginResourceSharing{
-			AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
-			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			CookiesAllowed: false,
-			Container:      wsContainer,
-		}
-
-		wsContainer.Filter(cors.Filter)
-		wsContainer.Filter(wsContainer.OPTIONSFilter)
-	}
-
 	// Route for js app
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))
 
-	server := http.Server{Addr: apiAddress, Handler: wsContainer}
-
 	log.Println("MongoDb Navigator server start listening.")
-	log.Fatal(server.ListenAndServe())
+	log.Fatal(http.ListenAndServe(apiAddress, handlers.CORS()(wsContainer)))
 }

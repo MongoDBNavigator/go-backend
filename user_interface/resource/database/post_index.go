@@ -1,29 +1,36 @@
 package database
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/model"
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/transformer/request"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to post index
-func (rcv *databaseResource) postIndex(req *restful.Request, res *restful.Response) {
+func (rcv *databaseResource) postIndex(w http.ResponseWriter, r *http.Request) {
 	var dbName value.DBName
 	var collName value.CollName
 
-	if err := request.ExtractParametersFromRequest(req, &dbName, &collName, nil, nil); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	if err := request.ExtractParametersFromRequest(r, &dbName, &collName, nil, nil); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
-	postRequest := new(representation.PostIndex)
+	var postRequest representation.PostIndex
 
-	if err := req.ReadEntity(&postRequest); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	if err := json.NewDecoder(r.Body).Decode(&postRequest); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -37,9 +44,9 @@ func (rcv *databaseResource) postIndex(req *restful.Request, res *restful.Respon
 	)
 
 	if err := rcv.indexWriter.Create(dbName, collName, index); err != nil {
-		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusConflict, err)
 		return
 	}
 
-	res.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 }

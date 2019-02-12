@@ -1,13 +1,17 @@
 package request
 
 import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/emicklei/go-restful"
 )
 
 // Extract collection name from url path
-func ExtractCollectionName(request *restful.Request) (value.CollName, error) {
-	collName := value.CollName(request.PathParameter("collectionName"))
+func ExtractCollectionName(r *http.Request) (value.CollName, error) {
+	vars := mux.Vars(r)
+	collName := value.CollName(vars["collectionName"])
 
 	if err := collName.Valid(); err != nil {
 		return "", err
@@ -17,8 +21,9 @@ func ExtractCollectionName(request *restful.Request) (value.CollName, error) {
 }
 
 // Extract database name from url path
-func ExtractDatabaseName(request *restful.Request) (value.DBName, error) {
-	dbName := value.DBName(request.PathParameter("databaseName"))
+func ExtractDatabaseName(r *http.Request) (value.DBName, error) {
+	vars := mux.Vars(r)
+	dbName := value.DBName(vars["databaseName"])
 
 	if err := dbName.Valid(); err != nil {
 		return "", err
@@ -28,8 +33,9 @@ func ExtractDatabaseName(request *restful.Request) (value.DBName, error) {
 }
 
 // Extract documentId from url path
-func ExtractDocumentId(request *restful.Request) (value.DocId, error) {
-	docId := value.DocId(request.PathParameter("documentId"))
+func ExtractDocumentId(r *http.Request) (value.DocId, error) {
+	vars := mux.Vars(r)
+	docId := value.DocId(vars["documentId"])
 
 	if err := docId.Valid(); err != nil {
 		return "", err
@@ -39,8 +45,9 @@ func ExtractDocumentId(request *restful.Request) (value.DocId, error) {
 }
 
 // Extract index name from url path
-func ExtractIndex(request *restful.Request) (value.IndexName, error) {
-	indexName := value.IndexName(request.PathParameter("indexName"))
+func ExtractIndex(r *http.Request) (value.IndexName, error) {
+	vars := mux.Vars(r)
+	indexName := value.IndexName(vars["indexName"])
 
 	if err := indexName.Valid(); err != nil {
 		return "", err
@@ -50,7 +57,7 @@ func ExtractIndex(request *restful.Request) (value.IndexName, error) {
 }
 
 // Extract all allowed parameters from url path
-func ExtractParametersFromRequest(request *restful.Request, db *value.DBName, coll *value.CollName, docId *value.DocId, index *value.IndexName) error {
+func ExtractParametersFromRequest(request *http.Request, db *value.DBName, coll *value.CollName, docId *value.DocId, index *value.IndexName) error {
 	if db != nil {
 		dbName, err := ExtractDatabaseName(request)
 

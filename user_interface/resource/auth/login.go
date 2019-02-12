@@ -1,27 +1,33 @@
 package auth
 
 import (
+	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
-
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/emicklei/go-restful"
-
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth/representation"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // Method to get JWT token
-func (rcv *authResource) login(request *restful.Request, response *restful.Response) {
-	postRequest := new(representation.PostCredentials)
+func (rcv *authResource) login(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	if err := request.ReadEntity(&postRequest); err != nil {
-		response.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	var postRequest representation.PostCredentials
+
+	if err := json.NewDecoder(r.Body).Decode(&postRequest); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if postRequest.Username != rcv.username || postRequest.Password != rcv.password {
-		response.WriteHeaderAndEntity(http.StatusForbidden, representation.Error{Message: "Invalid credentials."})
+		rcv.writeErrorResponse(w, http.StatusForbidden, errors.New("invalid credentials"))
 		return
 	}
 
@@ -34,12 +40,12 @@ func (rcv *authResource) login(request *restful.Request, response *restful.Respo
 	tokenString, err := token.SignedString([]byte(rcv.password))
 
 	if err != nil {
-		response.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	result := new(representation.JwtToken)
 	result.Token = tokenString
 
-	response.WriteEntity(result)
+	rcv.writeResponse(w, http.StatusOK, result)
 }

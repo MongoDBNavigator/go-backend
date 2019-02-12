@@ -2,34 +2,39 @@ package database
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/transformer/request"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to post document
-func (rcv *databaseResource) postDocument(req *restful.Request, res *restful.Response) {
+func (rcv *databaseResource) postDocument(w http.ResponseWriter, r *http.Request) {
 	var dbName value.DBName
 	var collName value.CollName
 
-	if err := request.ExtractParametersFromRequest(req, &dbName, &collName, nil, nil); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	if err := request.ExtractParametersFromRequest(r, &dbName, &collName, nil, nil); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
-	body, err := ioutil.ReadAll(req.Request.Body)
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := rcv.documentWriter.Create(dbName, collName, body); err != nil {
-		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusConflict, err)
 		return
 	}
 
-	res.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 }

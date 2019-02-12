@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
-	"github.com/emicklei/go-restful"
-	"github.com/emicklei/go-restful-openapi"
+	"github.com/gorilla/mux"
 
 	"github.com/MongoDBNavigator/go-backend/user_interface"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth/representation"
@@ -16,25 +17,24 @@ type authResource struct {
 	exp      int
 }
 
+// write status & body to response
+func (rcv *authResource) writeResponse(w http.ResponseWriter, status int, body interface{}) {
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(body); err != nil {
+		log.Println(err)
+	}
+}
+
+// write status & body to response
+func (rcv *authResource) writeErrorResponse(w http.ResponseWriter, status int, err error) {
+	rcv.writeResponse(w, status, representation.Error{Message: err.Error()})
+}
+
 // Method to register resource
-func (rcv *authResource) Register(container *restful.Container) {
-	ws := new(restful.WebService)
-
-	ws.Path("/api/v1/login").
-		Consumes(restful.MIME_JSON).
-		Produces(restful.MIME_JSON)
-
-	ws.Route(ws.POST("").
-		To(rcv.login).
-		Doc("Login (getting JWT token).").
-		Reads(representation.PostCredentials{}).
-		Returns(http.StatusOK, http.StatusText(http.StatusOK), representation.JwtToken{}).
-		Returns(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), representation.Error{}).
-		Returns(http.StatusBadRequest, http.StatusText(http.StatusBadRequest), representation.Error{}).
-		Returns(http.StatusForbidden, http.StatusText(http.StatusForbidden), representation.Error{}).
-		Metadata(restfulspec.KeyOpenAPITags, []string{"Authorization"}))
-
-	container.Add(ws)
+func (rcv *authResource) Register(container *mux.Router) {
+	container.HandleFunc("/api/v1/login", rcv.login).
+		Methods("POST").
+		Name("login")
 }
 
 // Constructor for swaggerResource

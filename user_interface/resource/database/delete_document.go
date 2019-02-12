@@ -4,26 +4,24 @@ import (
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/transformer/request"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to delete document
-func (rcv *databaseResource) deleteDocument(req *restful.Request, res *restful.Response) {
+func (rcv *databaseResource) deleteDocument(w http.ResponseWriter, r *http.Request) {
 	var dbName value.DBName
 	var collName value.CollName
 	var docId value.DocId
 
-	if err := request.ExtractParametersFromRequest(req, &dbName, &collName, &docId, nil); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	if err := request.ExtractParametersFromRequest(r, &dbName, &collName, &docId, nil); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := rcv.documentWriter.Delete(dbName, collName, docId); err != nil {
-		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusConflict, err)
 		return
 	}
 
-	res.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusAccepted)
 }

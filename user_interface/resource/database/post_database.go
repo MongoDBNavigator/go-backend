@@ -1,25 +1,32 @@
 package database
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to post database
-func (rcv *databaseResource) postDatabase(req *restful.Request, res *restful.Response) {
-	postRequest := new(representation.PostDatabase)
+func (rcv *databaseResource) postDatabase(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
-	if err := req.ReadEntity(&postRequest); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	var postRequest representation.PostDatabase
+
+	if err := json.NewDecoder(r.Body).Decode(&postRequest); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := rcv.databaseWriter.Create(postRequest.Name); err != nil {
-		res.WriteHeaderAndEntity(http.StatusConflict, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusConflict, err)
 		return
 	}
 
-	res.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 }

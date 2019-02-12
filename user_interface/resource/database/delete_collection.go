@@ -4,25 +4,23 @@ import (
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/domain/database/value"
-	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/representation"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/database/transformer/request"
-	"github.com/emicklei/go-restful"
 )
 
 // Method to delete collection
-func (rcv *databaseResource) deleteCollection(req *restful.Request, res *restful.Response) {
+func (rcv *databaseResource) deleteCollection(w http.ResponseWriter, r *http.Request) {
 	var dbName value.DBName
 	var collName value.CollName
 
-	if err := request.ExtractParametersFromRequest(req, &dbName, &collName, nil, nil); err != nil {
-		res.WriteHeaderAndEntity(http.StatusBadRequest, representation.Error{Message: err.Error()})
+	if err := request.ExtractParametersFromRequest(r, &dbName, &collName, nil, nil); err != nil {
+		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := rcv.collectionsWriter.Delete(dbName, collName); err != nil {
-		res.WriteHeaderAndEntity(http.StatusInternalServerError, representation.Error{Message: err.Error()})
+		rcv.writeErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	res.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusAccepted)
 }

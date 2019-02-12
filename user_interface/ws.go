@@ -1,7 +1,9 @@
 package user_interface
 
-import "github.com/emicklei/go-restful"
+import (
+	"github.com/gorilla/mux"
+)
 
 type WebService interface {
-	Register(container *restful.Container)
+	Register(container *mux.Router)
 }
