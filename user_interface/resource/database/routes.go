@@ -25,12 +25,12 @@ type databaseResource struct {
 	validationReader  repository.ValidationReader
 	validationWriter  repository.ValidationWriter
 	jwtMiddleware     middleware.Middleware
-	recoverMiddleware middleware.Middleware
 }
 
 // Method to register resource
 func (rcv *databaseResource) Register(r *mux.Router) {
 	sr := r.PathPrefix("/api/v1/databases").Subrouter()
+	sr.Use(rcv.jwtMiddleware.Handle)
 
 	sr.HandleFunc("", rcv.getDatabases).
 		Methods("GET").
@@ -110,7 +110,6 @@ func NewDatabaseResource(
 	validationReader repository.ValidationReader,
 	validationWriter repository.ValidationWriter,
 	jwtMiddleware middleware.Middleware,
-	recoverMiddleware middleware.Middleware,
 ) user_interface.WebService {
 	return &databaseResource{
 		databaseReader:    databaseReader,
@@ -124,7 +123,6 @@ func NewDatabaseResource(
 		validationReader:  validationReader,
 		validationWriter:  validationWriter,
 		jwtMiddleware:     jwtMiddleware,
-		recoverMiddleware: recoverMiddleware,
 	}
 }
 

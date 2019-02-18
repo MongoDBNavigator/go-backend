@@ -58,8 +58,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("Success connect to mongodb.")
-
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recovered from ", r)
@@ -85,11 +83,11 @@ func main() {
 
 	wsContainer := mux.NewRouter()
 	wsContainer.Use(middleware.NewContentTypeMiddleware().Handle) // globally content type
+	wsContainer.Use(middleware.NewRecoverMiddleware().Handle)
 
 	jwtMiddleware := middleware.NewJwtMiddleware(password)
-	recoverMiddleware := middleware.NewRecoverMiddleware()
 
-	system.NewSystemResource(systemReader, jwtMiddleware, recoverMiddleware).Register(wsContainer)
+	system.NewSystemResource(systemReader, jwtMiddleware).Register(wsContainer)
 	auth.NewAuthResource(username, password, jwtExp).Register(wsContainer)
 	database.NewDatabaseResource(
 		databaseReader,
@@ -103,7 +101,6 @@ func main() {
 		validationReader,
 		validationWriter,
 		jwtMiddleware,
-		recoverMiddleware,
 	).Register(wsContainer)
 
 	// Route for js app

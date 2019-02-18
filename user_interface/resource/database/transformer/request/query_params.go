@@ -2,20 +2,25 @@ package request
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/emicklei/go-restful"
+	"github.com/gorilla/mux"
 )
 
 // Extract skip parameter from query
-func ExtractSkip(request *restful.Request) (int, error) {
-	if len(strings.TrimSpace(request.QueryParameter("skip"))) == 0 {
+func ExtractSkip(r *http.Request) (int, error) {
+	if _, ok := mux.Vars(r)["skip"]; !ok {
 		return 0, nil
 	}
 
-	skip, err := strconv.Atoi(request.QueryParameter("skip"))
+	if len(strings.TrimSpace(mux.Vars(r)["skip"])) == 0 {
+		return 0, nil
+	}
+
+	skip, err := strconv.Atoi(mux.Vars(r)["skip"])
 
 	if err != nil {
 		return 0, errors.New("skip parameter should be of type integer")
@@ -29,12 +34,16 @@ func ExtractSkip(request *restful.Request) (int, error) {
 }
 
 // Extract limit parameter from query
-func ExtractLimit(request *restful.Request) (int, error) {
-	if len(strings.TrimSpace(request.QueryParameter("limit"))) == 0 {
+func ExtractLimit(r *http.Request) (int, error) {
+	if _, ok := mux.Vars(r)["limit"]; !ok {
 		return 10, nil
 	}
 
-	limit, err := strconv.Atoi(request.QueryParameter("limit"))
+	if len(strings.TrimSpace(mux.Vars(r)["limit"])) == 0 {
+		return 10, nil
+	}
+
+	limit, err := strconv.Atoi(mux.Vars(r)["limit"])
 
 	if err != nil {
 		return 0, errors.New("limit parameter should be of type integer")
@@ -52,8 +61,8 @@ func ExtractLimit(request *restful.Request) (int, error) {
 }
 
 // Extract sorts parameter from query
-func ExtractSort(request *restful.Request) (map[string]int, error) {
-	params, err := url.ParseQuery(request.Request.URL.RawQuery)
+func ExtractSort(r *http.Request) (map[string]int, error) {
+	params, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
 		return nil, err
@@ -86,10 +95,14 @@ func ExtractSort(request *restful.Request) (map[string]int, error) {
 }
 
 // Extract filters parameter from query
-func ExtractFilter(request *restful.Request) ([]byte, error) {
-	if len(strings.TrimSpace(request.QueryParameter("filter"))) == 0 {
+func ExtractFilter(r *http.Request) ([]byte, error) {
+	if _, ok := mux.Vars(r)["filter"]; !ok {
 		return nil, nil
 	}
 
-	return []byte(request.QueryParameter("filter")), nil
+	if len(strings.TrimSpace(mux.Vars(r)["filter"])) == 0 {
+		return nil, nil
+	}
+
+	return []byte(mux.Vars(r)["filter"]), nil
 }

@@ -1,23 +1,24 @@
 package middleware
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/auth/representation"
-	"github.com/emicklei/go-restful"
 )
 
 type recoverMiddleware struct{}
 
 // Recover and send 503
-func (rcv *recoverMiddleware) Handle(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	defer func() {
-		if r := recover(); r != nil {
-			resp.WriteHeaderAndEntity(http.StatusServiceUnavailable, representation.Error{Message: "Try again later."})
+func (rcv *recoverMiddleware) Handle(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		if err := json.NewEncoder(w).Encode(representation.Error{Message: "Try again later."}); err != nil {
+			log.Println(err)
 		}
-	}()
-
-	chain.ProcessFilter(req, resp)
+		next.ServeHTTP(w, r)
+	})
 }
 
 // Constructor for recoverMiddleware
