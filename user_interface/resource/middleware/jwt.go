@@ -34,6 +34,7 @@ func (rcv *jwtMiddleware) Handle(next http.Handler) http.Handler {
 
 		if err := jwtMiddleware.CheckJWT(w, r); err != nil {
 			log.Println(err)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})
