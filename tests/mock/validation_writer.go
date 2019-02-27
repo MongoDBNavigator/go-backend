@@ -5,6 +5,7 @@
 package mock
 
 import (
+	model "github.com/MongoDBNavigator/go-backend/domain/database/model"
 	value "github.com/MongoDBNavigator/go-backend/domain/database/value"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -34,13 +35,13 @@ func (m *MockValidationWriter) EXPECT() *MockValidationWriterMockRecorder {
 }
 
 // Write mocks base method
-func (m *MockValidationWriter) Write(arg0 value.DBName, arg1 value.CollName) error {
-	ret := m.ctrl.Call(m, "Write", arg0, arg1)
+func (m *MockValidationWriter) Write(arg0 value.DBName, arg1 value.CollName, arg2 *model.Validation) error {
+	ret := m.ctrl.Call(m, "Write", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Write indicates an expected call of Write
-func (mr *MockValidationWriterMockRecorder) Write(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockValidationWriter)(nil).Write), arg0, arg1)
+func (mr *MockValidationWriterMockRecorder) Write(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockValidationWriter)(nil).Write), arg0, arg1, arg2)
 }

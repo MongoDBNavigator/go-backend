@@ -34,7 +34,7 @@ func (m *MockDocumentWriter) EXPECT() *MockDocumentWriterMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockDocumentWriter) Create(arg0 value.DBName, arg1 value.CollName, arg2 interface{}) error {
+func (m *MockDocumentWriter) Create(arg0 value.DBName, arg1 value.CollName, arg2 []byte) error {
 	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -58,7 +58,7 @@ func (mr *MockDocumentWriterMockRecorder) Delete(arg0, arg1, arg2 interface{}) *
 }
 
 // Update mocks base method
-func (m *MockDocumentWriter) Update(arg0 value.DBName, arg1 value.CollName, arg2 value.DocId, arg3 interface{}) error {
+func (m *MockDocumentWriter) Update(arg0 value.DBName, arg1 value.CollName, arg2 value.DocId, arg3 []byte) error {
 	ret := m.ctrl.Call(m, "Update", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
