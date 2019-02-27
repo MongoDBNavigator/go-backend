@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -24,13 +23,9 @@ func TestPostDocumentSuccess(t *testing.T) {
 
 	docJson := `{"name":"John","gender":"m"}`
 
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
-
 	documentWriter.
 		EXPECT().
-		Create(dbName, collName, &doc).
+		Create(dbName, collName, []byte(docJson)).
 		Return(nil)
 
 	body := strings.NewReader(docJson)
@@ -42,7 +37,7 @@ func TestPostDocumentSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusCreated, httpWriter.Code)
 }
@@ -55,13 +50,9 @@ func TestPostDocumentConflict(t *testing.T) {
 
 	docJson := `{"name":"John","gender":"m"}`
 
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
-
 	documentWriter.
 		EXPECT().
-		Create(dbName, collName, &doc).
+		Create(dbName, collName, []byte(docJson)).
 		Return(errors.New("CONFLICT"))
 
 	body := strings.NewReader(docJson)
@@ -73,7 +64,7 @@ func TestPostDocumentConflict(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusConflict, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -96,7 +87,7 @@ func TestPostDocumentUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

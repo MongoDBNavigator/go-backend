@@ -9,8 +9,9 @@ import (
 func TestNewIndex(t *testing.T) {
 	name := "MyIndex"
 	fields := []string{"name"}
+	var partialFilterExpression interface{}
 
-	index := NewIndex(name, true, true, true, fields)
+	index := NewIndex(name, true, true, true, fields, partialFilterExpression)
 
 	assert.Equal(t, name, index.Name())
 	assert.Equal(t, fields, index.Fields())
@@ -22,8 +23,9 @@ func TestNewIndex(t *testing.T) {
 func TestNewIndex2(t *testing.T) {
 	name := "MyIndex2"
 	fields := []string{"name", "gender"}
+	var partialFilterExpression interface{}
 
-	index := NewIndex(name, false, false, false, fields)
+	index := NewIndex(name, false, false, false, fields, partialFilterExpression)
 
 	assert.Equal(t, name, index.Name())
 	assert.Equal(t, fields, index.Fields())

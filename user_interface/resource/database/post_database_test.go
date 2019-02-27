@@ -35,7 +35,7 @@ func TestPostDatabaseSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusCreated, httpWriter.Code)
 }
@@ -59,7 +59,7 @@ func TestPostDatabaseConflict(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusConflict, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -75,7 +75,7 @@ func TestPostDatabaseUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

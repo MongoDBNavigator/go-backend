@@ -21,7 +21,7 @@ func TestGetCollectionsSuccess(t *testing.T) {
 	dbName := value.DBName("myDB")
 
 	colls := make([]*model.Collection, 1)
-	colls[0] = model.NewCollection("MyColl", 1, 1, 1)
+	colls[0] = model.NewCollection("MyColl", 1, 1, 1, 1)
 
 	collectionsReader.
 		EXPECT().
@@ -35,11 +35,16 @@ func TestGetCollectionsSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusOK, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
-	assert.Equal(t, space.ReplaceAllString(httpWriter.Body.String(), ""), `{"objects":[{"name":"MyColl","documentsNumber":1,"indexesNumber":1,"avgObjSize":1}]}`)
+	assert.Equal(
+		t,
+		`{"objects":[{"name":"MyColl","size":1,"documentsNumber":1,"indexesNumber":1,"avgObjSize":1}]}`,
+		space.ReplaceAllString(httpWriter.Body.String(), ""),
+	)
+
 }
 
 func TestGetCollectionsInternalServerError(t *testing.T) {
@@ -58,7 +63,7 @@ func TestGetCollectionsInternalServerError(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusInternalServerError, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -75,7 +80,7 @@ func TestGetCollectionsUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

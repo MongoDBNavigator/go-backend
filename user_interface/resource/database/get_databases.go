@@ -11,7 +11,7 @@ func (rcv *databaseResource) getDatabases(w http.ResponseWriter, r *http.Request
 	databases, err := rcv.databaseReader.ReadAll()
 
 	if err != nil {
-		rcv.writeErrorResponse(w, http.StatusBadRequest, err)
+		rcv.writeErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 

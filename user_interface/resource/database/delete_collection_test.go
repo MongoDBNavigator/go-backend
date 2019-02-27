@@ -34,7 +34,7 @@ func TestDeleteCollectionSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusAccepted, httpWriter.Code)
 }
@@ -57,7 +57,7 @@ func TestDeleteCollectionInternalServerError(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusInternalServerError, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -76,7 +76,7 @@ func TestDeleteCollectionUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

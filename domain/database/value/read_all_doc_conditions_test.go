@@ -3,8 +3,6 @@ package value
 import (
 	"testing"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,8 +11,8 @@ func TestNewReadAllDocConditions(t *testing.T) {
 	collName := CollName("COLLECTION")
 	limit := 10
 	skip := 2
-	sort := []string{"-name"}
-	filter := bson.M{"name": "test"}
+	sort := map[string]int{"name": 1}
+	filter := []byte("name")
 
 	conditions := NewReadAllDocConditions(dbName, collName, limit, skip, sort, filter)
 

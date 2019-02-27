@@ -19,9 +19,10 @@ func TestGetIndexesSuccess(t *testing.T) {
 	container := initResource(t)
 	dbName := value.DBName("myDB")
 	collName := value.CollName("myColl")
+	var partialFilterExpression interface{}
 
 	indexes := make([]*model.Index, 1)
-	indexes[0] = model.NewIndex("_id_", true, true, false, []string{"_id"})
+	indexes[0] = model.NewIndex("_id_", true, true, false, []string{"_id"}, partialFilterExpression)
 
 	indexReader.
 		EXPECT().
@@ -35,7 +36,7 @@ func TestGetIndexesSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusOK, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -59,7 +60,7 @@ func TestGetIndexesInternalServerError(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusInternalServerError, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -77,7 +78,7 @@ func TestGetIndexesUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

@@ -10,18 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPostValidationUnauthorized(t *testing.T) {
+func TestPutValidationUnauthorized(t *testing.T) {
 	container := initResource(t)
 	dbName := value.DBName("myDB")
 	collName := value.CollName("myColl")
 
 	url := fmt.Sprintf("http://localhost/api/v1/databases/%s/collections/%s/validation", dbName, collName)
 
-	httpRequest, _ := http.NewRequest("POST", url, nil)
+	httpRequest, _ := http.NewRequest("PUT", url, nil)
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

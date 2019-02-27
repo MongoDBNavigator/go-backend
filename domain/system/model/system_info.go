@@ -17,7 +17,7 @@ func (s *SystemInfo) Version() string {
 	return s.version
 }
 
-// Getter for cpu architecture
+// Getter for ""
 func (s *SystemInfo) CpuArchitecture() int {
 	return s.cpuArchitecture
 }

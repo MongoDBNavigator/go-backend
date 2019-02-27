@@ -106,6 +106,10 @@ func main() {
 	// Route for js app
 	wsContainer.Handle("/", http.FileServer(http.Dir(defaultStaticFilesPath)))
 
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
+
 	log.Println("MongoDb Navigator server start listening.")
-	log.Fatal(http.ListenAndServe(apiAddress, handlers.CORS()(wsContainer)))
+	log.Fatal(http.ListenAndServe(apiAddress, handlers.CORS(originsOk, headersOk, methodsOk)(wsContainer)))
 }

@@ -8,8 +8,6 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"encoding/json"
-
 	"errors"
 	"regexp"
 
@@ -24,12 +22,7 @@ func TestPutDocumentSuccess(t *testing.T) {
 	dbName := value.DBName("myDB")
 	collName := value.CollName("myColl")
 	docId := value.DocId("myDoc")
-
 	docJson := `{"name":"John","gender":"m"}`
-
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
 
 	documentReader.
 		EXPECT().
@@ -38,7 +31,7 @@ func TestPutDocumentSuccess(t *testing.T) {
 
 	documentWriter.
 		EXPECT().
-		Update(dbName, collName, docId, &doc).
+		Update(dbName, collName, docId, []byte(docJson)).
 		Return(nil)
 
 	body := strings.NewReader(docJson)
@@ -50,7 +43,7 @@ func TestPutDocumentSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusAccepted, httpWriter.Code)
 }
@@ -64,10 +57,6 @@ func TestPutDocumentConflict(t *testing.T) {
 
 	docJson := `{"name":"John","gender":"m"}`
 
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
-
 	documentReader.
 		EXPECT().
 		Read(dbName, collName, docId).
@@ -75,7 +64,7 @@ func TestPutDocumentConflict(t *testing.T) {
 
 	documentWriter.
 		EXPECT().
-		Update(dbName, collName, docId, &doc).
+		Update(dbName, collName, docId, []byte(docJson)).
 		Return(errors.New("CONFLICT"))
 
 	body := strings.NewReader(docJson)
@@ -87,7 +76,7 @@ func TestPutDocumentConflict(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusConflict, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -103,10 +92,6 @@ func TestPutDocumentNotFound(t *testing.T) {
 
 	docJson := `{"name":"John","gender":"m"}`
 
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
-
 	documentReader.
 		EXPECT().
 		Read(dbName, collName, docId).
@@ -120,7 +105,7 @@ func TestPutDocumentNotFound(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusNotFound, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -136,10 +121,6 @@ func TestPutDocumentUnauthorized(t *testing.T) {
 
 	docJson := `{"name":"John","gender":"m"}`
 
-	var doc interface{}
-
-	json.Unmarshal([]byte(docJson), &doc)
-
 	body := strings.NewReader(docJson)
 	url := fmt.Sprintf("http://localhost/api/v1/databases/%s/collections/%s/documents/%s", dbName, collName, docId)
 
@@ -147,7 +128,7 @@ func TestPutDocumentUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }

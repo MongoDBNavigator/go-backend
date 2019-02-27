@@ -6,7 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emicklei/go-restful"
+	"github.com/gorilla/mux"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +16,7 @@ func TestLoginSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 
 	username := "admin"
 	password := "admin"
@@ -29,7 +30,7 @@ func TestLoginSuccess(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusOK, httpWriter.Code)
 	assert.True(t, strings.Contains(httpWriter.Body.String(), "token"))
@@ -39,7 +40,7 @@ func TestLoginInvalidCredentials(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 
 	username := "admin"
 	password := "admin"
@@ -53,8 +54,9 @@ func TestLoginInvalidCredentials(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusForbidden, httpWriter.Code)
-	assert.True(t, strings.Contains(httpWriter.Body.String(), "Invalid credentials."))
+
+	assert.True(t, strings.Contains(httpWriter.Body.String(), "invalid credentials"))
 }

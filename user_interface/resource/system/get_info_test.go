@@ -14,8 +14,8 @@ import (
 	"github.com/MongoDBNavigator/go-backend/tests/helper"
 	"github.com/MongoDBNavigator/go-backend/tests/mock"
 	"github.com/MongoDBNavigator/go-backend/user_interface/resource/middleware"
-	"github.com/emicklei/go-restful"
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,7 @@ func TestGetInfoSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 	systemInfoReader := mock.NewMockSystemInfoReader(ctrl)
 
 	systemInfo := model.NewSystemInfo("4.0.0", 64, "localhost")
@@ -40,7 +40,7 @@ func TestGetInfoSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusOK, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -51,7 +51,7 @@ func TestGetInfoUnauthorized(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 	systemInfoReader := mock.NewMockSystemInfoReader(ctrl)
 
 	NewSystemResource(systemInfoReader, middleware.NewJwtMiddleware(helper.PASSWORD)).Register(wsContainer)
@@ -60,7 +60,7 @@ func TestGetInfoUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }
@@ -69,7 +69,7 @@ func TestGetInfoForbidden(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 	systemInfoReader := mock.NewMockSystemInfoReader(ctrl)
 
 	NewSystemResource(systemInfoReader, middleware.NewJwtMiddleware(helper.PASSWORD)).Register(wsContainer)
@@ -79,7 +79,7 @@ func TestGetInfoForbidden(t *testing.T) {
 	httpRequest.Header.Set("Authorization", "Bearer test")
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusForbidden, httpWriter.Code)
 }
@@ -88,7 +88,7 @@ func TestGetInfoInternalServerError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	wsContainer := restful.NewContainer()
+	wsContainer := mux.NewRouter()
 	systemInfoReader := mock.NewMockSystemInfoReader(ctrl)
 
 	systemInfoReader.
@@ -103,7 +103,7 @@ func TestGetInfoInternalServerError(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	wsContainer.Dispatch(httpWriter, httpRequest)
+	wsContainer.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusInternalServerError, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)

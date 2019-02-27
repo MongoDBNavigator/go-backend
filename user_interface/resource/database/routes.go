@@ -92,9 +92,9 @@ func (rcv *databaseResource) Register(r *mux.Router) {
 		Methods("GET").
 		Name("get_validation")
 
-	sr.HandleFunc("/{databaseName}/collections/{collectionName}/indexes", rcv.putValidation).
+	sr.HandleFunc("/{databaseName}/collections/{collectionName}/validation", rcv.putValidation).
 		Methods("PUT").
-		Name("put_indexes")
+		Name("put_validation")
 }
 
 // Constructor for swaggerResource

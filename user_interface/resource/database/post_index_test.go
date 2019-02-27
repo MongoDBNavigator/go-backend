@@ -30,12 +30,15 @@ func TestPostIndexSuccess(t *testing.T) {
 
 	json.Unmarshal([]byte(indexJson), &index)
 
+	var partialFilterExpression interface{}
+
 	indexModel := model.NewIndex(
 		index.Name,
 		index.Unique,
 		index.Background,
 		index.Sparse,
 		index.Fields,
+		partialFilterExpression,
 	)
 
 	indexWriter.
@@ -52,7 +55,7 @@ func TestPostIndexSuccess(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusCreated, httpWriter.Code)
 }
@@ -69,12 +72,15 @@ func TestPostIndexConflict(t *testing.T) {
 
 	json.Unmarshal([]byte(indexJson), &index)
 
+	var partialFilterExpression interface{}
+
 	indexModel := model.NewIndex(
 		index.Name,
 		index.Unique,
 		index.Background,
 		index.Sparse,
 		index.Fields,
+		partialFilterExpression,
 	)
 
 	indexWriter.
@@ -91,7 +97,7 @@ func TestPostIndexConflict(t *testing.T) {
 	httpRequest.Header.Set("Authorization", fmt.Sprintf("Bearer %s", helper.GenerateJwtToken()))
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusConflict, httpWriter.Code)
 	space := regexp.MustCompile(`\s+`)
@@ -114,7 +120,7 @@ func TestPostIndexUnauthorized(t *testing.T) {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 
-	container.Dispatch(httpWriter, httpRequest)
+	container.ServeHTTP(httpWriter, httpRequest)
 
 	assert.Equal(t, http.StatusUnauthorized, httpWriter.Code)
 }
